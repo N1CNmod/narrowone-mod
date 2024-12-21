@@ -2,7 +2,7 @@
 // @name         Chinese theme Narrowone Background for N1CN
 // @namespace    http://tampermonkey.net/
 // @version      1
-// @description  wooden theme
+// @description  Chinese traditional new year theme
 // @author       N1CN
 // @match        https://narrow.one/*
 // @grant        GM_addStyle
