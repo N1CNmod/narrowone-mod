@@ -1,0 +1,32 @@
+// ==UserScript==
+// @name         Image substitution for N1CN
+// @namespace    http://tampermonkey.net/
+// @version      1
+// @description  Swap image assets on narrowone
+// @author       N1CN
+// @match        https://narrow.one/*
+// @downloadURL  https://github.com/TheGirlThatLived/NarrowOne_Customizations/raw/refs/heads/main/Scripts/ImageSubstitution
+// @updateURL    https://github.com/TheGirlThatLived/NarrowOne_Customizations/raw/refs/heads/main/Scripts/ImageSubstitution
+// @grant        none
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    const replacementTable = {
+        "static/img/hudIcons/flagRed.svg": "https://i.ibb.co/HqT381f/red-player-removebg-preview.png",
+        "static/img/hudIcons/flagBlue.svg": "https://i.ibb.co/W3qFmHm/blue-player-removebg-preview.png",
+        "static/img/hudIcons/playerIcon.svg": "https://i.ibb.co/8gSvdPm/player-removebg-preview.png",
+    }
+    const originalSrcDescriptor = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, "src");
+    Object.defineProperty(HTMLImageElement.prototype, "src", {
+        set(value) {
+            //console.log(value); // uncomment to determine what the values should be
+            if (replacementTable[value]) this.crossOrigin = "anonymous";
+            originalSrcDescriptor.set.call(this, replacementTable[value] ?? value);
+        },
+        get() {
+            return originalSrcDescriptor.get.call(this);
+        }
+    });
+})();
