@@ -1,0 +1,65 @@
+// ==UserScript==
+// @name         Health Bar Percentage Display(in 4 decimal place) for N1CN
+// @namespace    https://narrow.one/
+// @version      1
+// @description  Display a text percentage of current HP bar state (next to the HP bar).
+// @author       N1CN
+// @run-at       document-start
+// @match        https://narrow.one/
+// @icon         https://www.svgrepo.com/show/404891/broken-heart.svg
+// @downloadURL  https://raw.githubusercontent.com/TheGirlThatLived/NarrowOne_Customizations/refs/heads/main/Scripts/HealthBarPercentage.js
+// @updateURL    https://raw.githubusercontent.com/TheGirlThatLived/NarrowOne_Customizations/refs/heads/main/Scripts/HealthBarPercentage.js
+// @grant        none
+// ==/UserScript==
+
+const healthBarObserver = new MutationObserver((mutationsList) => {
+    for (const mutation of mutationsList) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+            // Get the current width from the style
+            const currentWidth = observedHealthBarPart.style.width;
+
+            console.log('Width changed to:', currentWidth);
+            heathTextDisplayElement.textContent = currentWidth;
+        }
+    }
+});
+let observedHealthBarPart = null;
+let heathTextDisplayElement = document.createElement("div");
+
+const isHealthBar = (elem) => elem.classList.contains("health-ui-container");
+const gameWrapperObserver = new MutationObserver((mutationsList) => {
+    for (const mutation of mutationsList) {
+        if (mutation.type === "childList") {
+            if (mutation.addedNodes[0] && isHealthBar(mutation.addedNodes[0])) {
+                addHealthBar(mutation.addedNodes[0]);
+            }
+            if (mutation.removedNodes[0] && isHealthBar(mutation.removedNodes[0])) {
+                removeHealthBar(mutation.removedNodes[0])
+            }
+            //console.log('Added', mutation.addedNodes, "Removed", mutation.removedNodes);
+        }
+    }
+});
+gameWrapperObserver.observe(document.getElementById("gameWrapper"), {
+    childList: true
+});
+
+function addHealthBar(element) {
+    console.log("Added health bar", element);
+    element.append(heathTextDisplayElement);
+
+    observedHealthBarPart = document.getElementsByClassName("health-ui-bar clip")[0];
+    healthBarObserver.observe(observedHealthBarPart, {
+        attributes: true,
+        attributeFilter: ['style']
+    });
+}
+function removeHealthBar(element) {
+    console.log("Removed health bar", element);
+    heathTextDisplayElement.remove();
+    healthBarObserver.disconnect();
+
+}
+
+
+fuction
