@@ -60,6 +60,3 @@ function removeHealthBar(element) {
     healthBarObserver.disconnect();
 
 }
-
-
-fuction
