@@ -60,3 +60,7 @@ function removeHealthBar(element) {
     healthBarObserver.disconnect();
 
 }
+
+healthTextDisplayElement.style.color = "yellow"; // Change text color
+healthTextDisplayElement.style.fontSize = "25px"; // Change font size
+healthTextDisplayElement.style.fontWeight = "lighter"; // Change text weight
