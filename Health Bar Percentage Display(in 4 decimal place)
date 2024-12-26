@@ -61,6 +61,6 @@ function removeHealthBar(element) {
 
 }
 
-healthTextDisplayElement.style.color = "yellow"; // Change text color
+healthTextDisplayElement.style.color = "White"; // Change text color
 healthTextDisplayElement.style.fontSize = "25px"; // Change font size
-healthTextDisplayElement.style.fontWeight = "lighter"; // Change text weight
+healthTextDisplayElement.style.fontWeight = "normal"; // Change text weight
