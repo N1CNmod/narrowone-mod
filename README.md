@@ -10,5 +10,5 @@ Seasonal Gears: All Seasonal Gears will be added in your shop .
 Image substitution: The icon for flags and players will be changed.
 No Physics Changes: This mod does not alter any game physics, ensuring a consistent gaming experience.
 
-Reminder
+Reminder:
 You can only use this mod on your own responsibility
