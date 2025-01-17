@@ -19,12 +19,12 @@ const healthBarObserver = new MutationObserver((mutationsList) => {
             const currentWidth = observedHealthBarPart.style.width;
 
             console.log('Width changed to:', currentWidth);
-            heathTextDisplayElement.textContent = currentWidth;
+            healthTextDisplayElement.textContent = currentWidth;
         }
     }
 });
 let observedHealthBarPart = null;
-let heathTextDisplayElement = document.createElement("div");
+let healthTextDisplayElement = document.createElement("div");
 
 const isHealthBar = (elem) => elem.classList.contains("health-ui-container");
 const gameWrapperObserver = new MutationObserver((mutationsList) => {
@@ -56,7 +56,7 @@ function addHealthBar(element) {
 }
 function removeHealthBar(element) {
     console.log("Removed health bar", element);
-    heathTextDisplayElement.remove();
+    healthTextDisplayElement.remove();
     healthBarObserver.disconnect();
 
 }
