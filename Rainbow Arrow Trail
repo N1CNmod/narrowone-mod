@@ -1,0 +1,19 @@
+// ==UserScript==
+// @name         Rainbow Arrow Trail
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @authur       N1CN
+// @description  Force rainbow arrow trail effect permanently
+// @match        https://narrow.one/
+// @grant        unsafeWindow
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    unsafeWindow.Date.now = function() {
+        return new Date(Date.UTC(2024, 4, 11, 12)).getTime();
+    };
+
+
+})();
