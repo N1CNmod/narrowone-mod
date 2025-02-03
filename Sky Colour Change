@@ -1,0 +1,198 @@
+// ==UserScript==
+// @name         Sky Colour Change by CN Clan
+// @namespace    http://tampermonkey.net/
+// @version      2025-02-02
+// @description  Continuously modify the sky color to black (customizable), customize hit effects colors, customize teammate identification colors, customize bow colors...
+// @author       N1CN
+// @match        https://narrow.one/*
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=narrow.one
+// @grant        unsafeWindow
+// @run-at       document-start
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    const DEBUG = true;
+
+    // Logging function for debugging
+    function log(...args) {
+        if (DEBUG) {
+            console.log('[Sky Modifier]', ...args);
+        }
+    }
+
+    // Store all color-related uniforms
+    const colorUniforms = new Set();
+
+    // Target color for modification
+
+    //CHANGE THE COLOR HERE
+    //CHANGE THE COLOR HERE
+    //CHANGE THE COLOR HERE
+    //CHANGE THE COLOR HERE
+    //CHANGE THE COLOR HERE
+
+    const TARGET_COLOR = [0, 0, 0]; // Dark mode
+
+    //CHANGE THE COLOR HERE
+    //CHANGE THE COLOR HERE
+    //CHANGE THE COLOR HERE
+    //CHANGE THE COLOR HERE
+
+    let originalFunctions = {
+        getContext: HTMLCanvasElement.prototype.getContext,
+        getUniformLocation: null,
+        uniform3f: null,
+        uniform4f: null,
+        uniform3fv: null,
+        uniform4fv: null
+    };
+
+    let lastContext = null;
+
+    // Check if the values are in the color range (0-1)
+    function isColorValue(v1, v2, v3) {
+        return [v1, v2, v3].every(v => v >= 0 && v <= 1);
+    }
+
+    // Intercept and modify uniform location fetching
+    function handleGetUniformLocation(context) {
+        const original = context.getUniformLocation;
+        originalFunctions.getUniformLocation = original;
+
+        return function(program, name) {
+            const location = original.apply(this, arguments);
+            return location;
+        };
+    }
+
+    // Intercept and modify uniform3f function
+    function handleUniform3f(context) {
+        const original = context.uniform3f;
+        originalFunctions.uniform3f = original;
+
+        return function(location, v1, v2, v3) {
+            if (isColorValue(v1, v2, v3)) {
+                log(`Found color uniform: [${v1}, ${v2}, ${v3}]`);
+                colorUniforms.add(location);
+                return original.call(this, location, ...TARGET_COLOR);
+            }
+            return original.apply(this, arguments);
+        };
+    }
+
+    // Intercept and modify uniform4f function
+    function handleUniform4f(context) {
+        const original = context.uniform4f;
+        originalFunctions.uniform4f = original;
+
+        return function(location, v1, v2, v3, v4) {
+            if (isColorValue(v1, v2, v3)) {
+                log(`Found color uniform4f: [${v1}, ${v2}, ${v3}, ${v4}]`);
+                colorUniforms.add(location);
+                return original.call(this, location, ...TARGET_COLOR, v4);
+            }
+            return original.apply(this, arguments);
+        };
+    }
+
+    // Intercept and modify uniform3fv function
+    function handleUniform3fv(context) {
+        const original = context.uniform3fv;
+        originalFunctions.uniform3fv = original;
+
+        return function(location, value) {
+            if (value.length === 3 && isColorValue(...value)) {
+                log(`Found color uniform3fv: [${value}]`);
+                colorUniforms.add(location);
+                return original.call(this, location, new Float32Array(TARGET_COLOR));
+            }
+            return original.apply(this, arguments);
+        };
+    }
+
+    // Intercept and modify uniform4fv function
+    function handleUniform4fv(context) {
+        const original = context.uniform4fv;
+        originalFunctions.uniform4fv = original;
+
+        return function(location, value) {
+            if (value.length === 4 && isColorValue(value[0], value[1], value[2])) {
+                log(`Found color uniform4fv: [${value}]`);
+                colorUniforms.add(location);
+                return original.call(this, location, new Float32Array([...TARGET_COLOR, value[3]]));
+            }
+            return original.apply(this, arguments);
+        };
+    }
+
+    // Hook WebGL functions to modify uniforms
+    function hookWebGL() {
+        log('Injecting WebGL Hook');
+
+        HTMLCanvasElement.prototype.getContext = function() {
+            const context = originalFunctions.getContext.apply(this, arguments);
+
+            if ((arguments[0] === 'webgl' || arguments[0] === 'webgl2') && !context._hooked) {
+                log('Creating WebGL context');
+                lastContext = context;
+
+                if (!context._hooked) {
+                    context.getUniformLocation = handleGetUniformLocation(context);
+                    context.uniform3f = handleUniform3f(context);
+                    context.uniform4f = handleUniform4f(context);
+                    context.uniform3fv = handleUniform3fv(context);
+                    context.uniform4fv = handleUniform4fv(context);
+                    context._hooked = true;
+                    log('Hooking complete');
+                }
+            }
+
+            return context;
+        };
+    }
+
+    // Periodically reset uniforms if necessary
+    function setupPeriodicCheck() {
+        setInterval(() => {
+            if (lastContext && colorUniforms.size > 0) {
+                for (const location of colorUniforms) {
+                    lastContext.uniform3f(location, ...TARGET_COLOR);
+                    lastContext.uniform4f(location, ...TARGET_COLOR, 1.0);
+                }
+            }
+        }, 100);
+    }
+
+    // Initialize the script
+    function initialize() {
+        try {
+            log('Script initialization started');
+            hookWebGL();
+            setupPeriodicCheck();
+
+            unsafeWindow.resetSkyColor = function() {
+                log('Manually reset sky color');
+                if (lastContext && colorUniforms.size > 0) {
+                    for (const location of colorUniforms) {
+                        lastContext.uniform3f(location, ...TARGET_COLOR);
+                        lastContext.uniform4f(location, ...TARGET_COLOR, 1.0);
+                    }
+                }
+            };
+
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    unsafeWindow.resetSkyColor();
+                }
+            });
+
+            log('Initialization completed');
+        } catch (error) {
+            console.error('[Sky Modifier] Initialization failed:', error);
+        }
+    }
+
+    initialize();
+})();
