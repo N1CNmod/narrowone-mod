@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         Rainbow Arrow Trail
+// @name         Rainbow Arrow Trail by CN clan
 // @namespace    http://tampermonkey.net/
 // @version      1.0
 // @authur       N1CN
-// @description  Force rainbow arrow trail effect permanently
+// @description  Force rainbow arrow trail effect permanently(It's beautiful)
 // @match        https://narrow.one/
 // @grant        unsafeWindow
 // ==/UserScript==
