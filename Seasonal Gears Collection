@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Seasonal Gears for N1CN
+// @name         Seasonal Gears Collection
 // @namespace    http://tampermonkey.net/
 // @version      1
-// @description  Special Gears!
+// @description  You can get seasonal gears by running this mod, made by T7 clan.
 // @author       N1CN
 // @match        https://narrow.one/*
 // @grant        none
