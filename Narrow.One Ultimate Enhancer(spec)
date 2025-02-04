@@ -1,0 +1,683 @@
+// ==UserScript==
+// @name         Narrow.One Ultimate Enhancer by CN Clan
+// @namespace    http://tampermonkey.net/
+// @version      2025-02-05
+// @description  Advanced camera controls, dark mode and visual enhancements for narrow.one
+// @author       N1CN
+// @match        https://narrow.one/*
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=narrow.one
+// @grant        unsafeWindow
+// @run-at       document-start
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // Debug mode
+    const DEBUG = true;
+    const uniformInfo = new Map();
+
+    // Global states
+    let cameraControlEnabled = false;
+    let darkSkyEnabled = false;
+    let darkWorldEnabled = false;
+
+    // Color configurations
+    const skyColors = {
+        high: [0.47, 0.69, 0.89],
+        mid: [0.45, 0.66, 0.85],
+        low: [0.43, 0.63, 0.81]
+    };
+
+    // Uniform keywords
+    const COLOR_KEYWORDS = ['color', 'colour', 'diffuse', 'specular', 'albedo', 'tint', 'base', 'material'];
+    const SKY_KEYWORDS = ['sky', 'fog', 'atmosphere'];
+
+    // Camera system variables
+    let originalCameraPosition = null;
+    let originalViewMatrix = null;
+    let TARGET_CAMERA_POSITION = null;
+    let TARGET_VIEW_MATRIX = null;
+    let cameraRotationX = 0;
+    let cameraRotationY = 0;
+
+    // Speed control
+    const BASE_MOVE_SPEED = 0.2;
+    const BASE_ROTATE_SPEED = 0.04;
+    const MAX_SPEED_MULTIPLIER = 1.5;
+    const MIN_SPEED_MULTIPLIER = 0.8;
+    const ACCELERATION = 0.1;
+    const DECELERATION = 0.08;
+    const DAMPING = 0.7;
+
+    let currentSpeedMultiplier = 1.0;
+    let currentVelocity = 0;
+    let MOVE_SPEED = BASE_MOVE_SPEED;
+    let ROTATE_SPEED = BASE_ROTATE_SPEED;
+
+    const KEYS = {
+        'i': false, 'k': false, 'j': false, 'l': false,
+        'u': false, 'o': false, 'w': false, 's': false,
+        'a': false, 'd': false, ' ': false
+    };
+    let isMoving = false;
+
+    // Matrix utilities
+    const MatrixUtils = {
+        getForwardVector(rotX, rotY) {
+            return [
+                Math.sin(rotY) * Math.cos(rotX),
+                -Math.sin(rotX),
+                Math.cos(rotY) * Math.cos(rotX)
+            ];
+        },
+        getRightVector(rotY) {
+            return [
+                Math.cos(rotY),
+                0,
+                -Math.sin(rotY)
+            ];
+        },
+        scale(v, s) {
+            return [v[0] * s, v[1] * s, v[2] * s];
+        },
+        add(a, b) {
+            return [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
+        },
+        lookAt(eye, target, up) {
+            const zAxis = this.normalize(this.subtractVectors(target, eye));
+            const xAxis = this.normalize(this.crossVectors(up, zAxis));
+            const yAxis = this.crossVectors(zAxis, xAxis);
+
+            return new Float32Array([
+                xAxis[0], yAxis[0], zAxis[0], 0,
+                xAxis[1], yAxis[1], zAxis[1], 0,
+                xAxis[2], yAxis[2], zAxis[2], 0,
+                -this.dotVectors(xAxis, eye),
+                -this.dotVectors(yAxis, eye),
+                -this.dotVectors(zAxis, eye),
+                1
+            ]);
+        },
+        subtractVectors(a, b) {
+            return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+        },
+        crossVectors(a, b) {
+            return [
+                a[1] * b[2] - a[2] * b[1],
+                a[2] * b[0] - a[0] * b[2],
+                a[0] * b[1] - a[1] * b[0]
+            ];
+        },
+        normalize(v) {
+            const length = Math.sqrt(v[0] ** 2 + v[1] ** 2 + v[2] ** 2);
+            return length > 0 ? [v[0]/length, v[1]/length, v[2]/length] : v;
+        },
+        dotVectors(a, b) {
+            return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+        }
+    };
+
+    // 完整样式（来自第一个脚本）
+    const styles = `
+        .cn-control-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px;
+            background: rgba(33, 33, 33, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 9999;
+            font-family: 'Arial', sans-serif;
+            transition: all 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(20px);
+        }
+
+        .cn-control-panel.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+        }
+
+        .cn-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(60, 60, 60, 0.95);
+            color: #ffffff;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-width: 160px;
+        }
+
+        .cn-button:hover {
+            background: rgba(80, 80, 80, 0.95);
+            transform: translateY(-1px);
+        }
+
+        .cn-button.active {
+            background: rgba(0, 120, 255, 0.75);
+        }
+
+        .cn-status {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #666;
+            margin-left: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .cn-status.active {
+            background: #4CAF50;
+        }
+
+        .cn-tooltip {
+            position: absolute;
+            background: rgba(33, 33, 33, 0.95);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            z-index: 10000;
+            left: 0;
+            top: 50%;
+            transform: translate(-100%, -50%);
+        }
+
+        .cn-tooltip:after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-width: 6px 0 6px 6px;
+            border-style: solid;
+            border-color: transparent transparent transparent rgba(33, 33, 33, 0.95);
+        }
+
+        .color-wheels {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(40, 40, 40, 0.8);
+            border-radius: 8px;
+            display: none;
+        }
+
+        .color-wheel-group {
+            margin-bottom: 12px;
+        }
+
+        .color-wheel-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+            color: #fff;
+            font-size: 12px;
+        }
+
+        .color-preview {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .color-wheel {
+            width: 100%;
+            height: 30px;
+            cursor: pointer;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .color-wheel input[type="color"] {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
+
+        .cn-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 5px 0;
+        }
+    `;
+
+  // Utility functions
+    function log(source, ...args) {
+        DEBUG && console.log(`[${source}]`, ...args);
+    }
+
+    // UI Components（修复颜色选择器）
+    function createColorWheel(label, defaultColor, key) { // 添加key参数
+        const group = document.createElement('div');
+        group.className = 'color-wheel-group';
+
+        const labelDiv = document.createElement('div');
+        labelDiv.className = 'color-wheel-label';
+
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = label;
+
+        const preview = document.createElement('div');
+        preview.className = 'color-preview';
+        preview.style.backgroundColor = rgbToHex(defaultColor);
+
+        labelDiv.appendChild(nameSpan);
+        labelDiv.appendChild(preview);
+
+        const wheelDiv = document.createElement('div');
+        wheelDiv.className = 'color-wheel';
+
+        const colorInput = document.createElement('input');
+        colorInput.type = 'color';
+        colorInput.value = rgbToHex(defaultColor);
+
+        colorInput.addEventListener('input', (e) => {
+            const newColor = hexToRgb(e.target.value);
+            preview.style.backgroundColor = e.target.value;
+            skyColors[key] = newColor; // 使用传入的key参数
+            log('ColorWheel', `Updated ${key} color:`, newColor);
+        });
+
+        wheelDiv.appendChild(colorInput);
+        group.appendChild(labelDiv);
+        group.appendChild(wheelDiv);
+
+        return group;
+    }
+
+
+    function rgbToHex(rgb) {
+        return '#' + rgb.map(x => Math.round(x * 255).toString(16).padStart(2, '0')).join('');
+    }
+
+    function hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? [
+            parseInt(result[1], 16) / 255,
+            parseInt(result[2], 16) / 255,
+            parseInt(result[3], 16) / 255
+        ] : null;
+    }
+
+    // UI Components（使用第一个脚本的完整UI实现）
+    function createButton(text, tooltip) {
+        const button = document.createElement('button');
+        button.className = 'cn-button';
+
+        const buttonText = document.createElement('span');
+        buttonText.textContent = text;
+
+        const status = document.createElement('span');
+        status.className = 'cn-status';
+
+        button.appendChild(buttonText);
+        button.appendChild(status);
+
+        // 创建tooltip
+        const tip = document.createElement('div');
+        tip.className = 'cn-tooltip';
+        tip.textContent = tooltip;
+        button.appendChild(tip);
+
+        button.addEventListener('mouseenter', () => {
+            tip.style.opacity = '1';
+        });
+
+        button.addEventListener('mouseleave', () => {
+            tip.style.opacity = '0';
+        });
+
+        return button;
+    }
+
+    // 修复相机控制切换
+    function handleCameraControlToggle() {
+        if (cameraControlEnabled) {
+            document.addEventListener('keydown', handleKeyDown);
+            document.addEventListener('keyup', handleKeyUp);
+            document.body.style.cursor = 'crosshair';
+            log('Camera', 'Camera controls enabled');
+        } else {
+            document.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('keyup', handleKeyUp);
+            document.body.style.cursor = 'default';
+            resetCamera();
+            log('Camera', 'Camera controls disabled');
+        }
+    }
+
+
+    function createControlPanel() {
+        const panel = document.createElement('div');
+        panel.className = 'cn-control-panel';
+
+        // 创建按钮
+        const observerBtn = createButton('Observer Mode', 'Free camera control');
+        const darkSkyBtn = createButton('Dark Sky', 'Custom sky colors');
+        const darkWorldBtn = createButton('Dark World', 'Global dark mode');
+
+        // 添加分隔线
+        const divider1 = document.createElement('div');
+        divider1.className = 'cn-divider';
+        const divider2 = document.createElement('div');
+        divider2.className = 'cn-divider';
+
+        // 创建色轮容器
+        const colorWheels = document.createElement('div');
+        colorWheels.className = 'color-wheels';
+         // 修正颜色选择器调用
+        colorWheels.append(
+            createColorWheel('Sky High', skyColors.high, 'high'),
+            createColorWheel('Sky Mid', skyColors.mid, 'mid'),
+            createColorWheel('Sky Low', skyColors.low, 'low')
+        );
+
+        // 事件处理
+        observerBtn.addEventListener('click', () => {
+            cameraControlEnabled = !cameraControlEnabled;
+            toggleButtonState(observerBtn, cameraControlEnabled);
+            handleCameraControlToggle();
+        });
+
+        darkSkyBtn.addEventListener('click', () => {
+            darkSkyEnabled = !darkSkyEnabled;
+            toggleButtonState(darkSkyBtn, darkSkyEnabled);
+            colorWheels.style.display = darkSkyEnabled ? 'block' : 'none';
+        });
+
+        darkWorldBtn.addEventListener('click', () => {
+            darkWorldEnabled = !darkWorldEnabled;
+            toggleButtonState(darkWorldBtn, darkWorldEnabled);
+        });
+
+        // 组装面板
+        panel.append(
+            observerBtn,
+            divider1,
+            darkSkyBtn,
+            divider2,
+            darkWorldBtn,
+            colorWheels
+        );
+
+        // Tab键切换面板
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                panel.classList.toggle('visible');
+            }
+        });
+
+        return panel;
+    }
+
+    // 保持原有WebGL和相机控制代码不变...
+
+    // 其他辅助函数
+    function toggleButtonState(button, active) {
+        const status = button.querySelector('.cn-status');
+        button.classList.toggle('active', active);
+        status.classList.toggle('active', active);
+    }
+
+    // WebGL Handling
+    function handleGetUniformLocation(context) {
+        const original = context.getUniformLocation;
+        return function(program, name) {
+            const location = original.apply(this, arguments);
+            if (location) {
+                uniformInfo.set(location, { name });
+                log('WebGL', `Registered uniform: ${name}`);
+            }
+            return location;
+        };
+    }
+
+    function handleUniform3f(context) {
+        const original = context.uniform3f;
+        return function(location, x, y, z) {
+            const info = uniformInfo.get(location);
+
+            // Dark Sky handling
+            if (darkSkyEnabled && info) {
+                if (info.name === 'skyHighCol') return original.call(this, location, ...skyColors.high);
+                if (info.name === 'skyMidCol') return original.call(this, location, ...skyColors.mid);
+                if (info.name === 'skyLowCol') return original.call(this, location, ...skyColors.low);
+            }
+
+            // Dark World handling
+            if (darkWorldEnabled && info && isColorUniform(info.name) && !isSkyUniform(info.name)) {
+                return original.call(this, location, 0, 0, 0);
+            }
+
+            return original.call(this, location, x, y, z);
+        };
+    }
+
+    function isColorUniform(name) {
+        return COLOR_KEYWORDS.some(kw => name.toLowerCase().includes(kw));
+    }
+
+    function isSkyUniform(name) {
+        return SKY_KEYWORDS.some(kw => name.toLowerCase().includes(kw));
+    }
+
+  // Camera control functions
+function updateSpeed() {
+    const isAccelerating = KEYS[' '];
+    let acceleration = isAccelerating ? ACCELERATION : -DECELERATION;
+
+    currentVelocity += acceleration;
+    currentVelocity *= DAMPING;
+
+    currentSpeedMultiplier += currentVelocity;
+    currentSpeedMultiplier = Math.max(MIN_SPEED_MULTIPLIER,
+                                    Math.min(MAX_SPEED_MULTIPLIER,
+                                    currentSpeedMultiplier));
+
+    MOVE_SPEED = BASE_MOVE_SPEED * currentSpeedMultiplier;
+    ROTATE_SPEED = BASE_ROTATE_SPEED * currentSpeedMultiplier;
+}
+
+function updateCamera(dx, dy, dz, rotateY = 0, rotateX = 0) {
+    if (!TARGET_CAMERA_POSITION || !TARGET_VIEW_MATRIX) return;
+
+    cameraRotationY += rotateY;
+    cameraRotationX = Math.max(-Math.PI/2.2, Math.min(Math.PI/2.2, cameraRotationX + rotateX));
+
+    const forward = MatrixUtils.getForwardVector(cameraRotationX, cameraRotationY);
+    const right = MatrixUtils.getRightVector(cameraRotationY);
+    const up = [0, 1, 0];
+
+    const moveDir = [0, 0, 0];
+
+    if (dz !== 0) {
+        const scaledForward = MatrixUtils.scale(forward, dz);
+        moveDir[0] += scaledForward[0];
+        moveDir[1] += scaledForward[1];
+        moveDir[2] += scaledForward[2];
+    }
+
+    if (dx !== 0) {
+        const scaledRight = MatrixUtils.scale(right, dx);
+        moveDir[0] += scaledRight[0];
+        moveDir[2] += scaledRight[2];
+    }
+
+    if (dy !== 0) {
+        moveDir[1] += dy;
+    }
+
+    TARGET_CAMERA_POSITION[0] += moveDir[0];
+    TARGET_CAMERA_POSITION[1] += moveDir[1];
+    TARGET_CAMERA_POSITION[2] += moveDir[2];
+
+    const target = MatrixUtils.add(
+        TARGET_CAMERA_POSITION,
+        forward
+    );
+
+    TARGET_VIEW_MATRIX = Array.from(
+        MatrixUtils.lookAt(
+            TARGET_CAMERA_POSITION,
+            target,
+            up
+        )
+    );
+}
+
+function handleKeyDown(event) {
+    const key = event.key.toLowerCase();
+    if (key in KEYS) {
+        KEYS[key] = true;
+        if (!isMoving) {
+            isMoving = true;
+            updateCameraPosition();
+        }
+        event.preventDefault();
+    }
+}
+
+function handleKeyUp(event) {
+    const key = event.key.toLowerCase();
+    if (key in KEYS) {
+        KEYS[key] = false;
+        isMoving = Object.values(KEYS).some(pressed => pressed);
+        event.preventDefault();
+    }
+}
+
+function updateCameraPosition() {
+    if (!isMoving || !cameraControlEnabled) return;
+
+    if (!TARGET_CAMERA_POSITION || !TARGET_VIEW_MATRIX) {
+        log('Camera', 'Error: Camera data not initialized');
+        return;
+    }
+
+    updateSpeed();
+
+    let dx = 0, dy = 0, dz = 0;
+    let rotateY = 0, rotateX = 0;
+
+    // Movement controls
+    if (KEYS['i']) dz -= MOVE_SPEED;
+    if (KEYS['k']) dz += MOVE_SPEED;
+    if (KEYS['j']) dx -= MOVE_SPEED;
+    if (KEYS['l']) dx += MOVE_SPEED;
+    if (KEYS['u']) dy += MOVE_SPEED;
+    if (KEYS['o']) dy -= MOVE_SPEED;
+
+    // Rotation controls
+    if (KEYS['a']) rotateY += ROTATE_SPEED;
+    if (KEYS['d']) rotateY -= ROTATE_SPEED;
+    if (KEYS['w']) rotateX -= ROTATE_SPEED;
+    if (KEYS['s']) rotateX += ROTATE_SPEED;
+
+    updateCamera(dx, dy, dz, rotateY, rotateX);
+
+    if (isMoving) {
+        requestAnimationFrame(updateCameraPosition);
+    }
+}
+
+function resetCamera() {
+    if (originalCameraPosition && originalViewMatrix) {
+        TARGET_CAMERA_POSITION = [...originalCameraPosition];
+        TARGET_VIEW_MATRIX = [...originalViewMatrix];
+        cameraRotationX = 0;
+        cameraRotationY = 0;
+        currentSpeedMultiplier = 1.0;
+        currentVelocity = 0;
+    }
+}
+
+function handleUniformMatrix4fv(context) {
+    const original = context.uniformMatrix4fv;
+    return function(location, transpose, value) {
+        const info = uniformInfo.get(location);
+        if (info && info.name === 'viewMatrix') {
+            if (!originalViewMatrix) {
+                originalViewMatrix = Array.from(value);
+                TARGET_VIEW_MATRIX = Array.from(value);
+                TARGET_CAMERA_POSITION = [
+                    -value[12],
+                    -value[13],
+                    -value[14]
+                ];
+                originalCameraPosition = [...TARGET_CAMERA_POSITION];
+            }
+
+            if (cameraControlEnabled && TARGET_VIEW_MATRIX) {
+                return original.call(this, location, transpose, new Float32Array(TARGET_VIEW_MATRIX));
+            }
+        }
+        return original.apply(this, arguments);
+    };
+}
+    function hookWebGL() {
+        const originalGetContext = HTMLCanvasElement.prototype.getContext;
+        HTMLCanvasElement.prototype.getContext = function() {
+            const context = originalGetContext.apply(this, arguments);
+            if ((arguments[0] === 'webgl' || arguments[0] === 'webgl2') && !context._hooked) {
+                context.getUniformLocation = handleGetUniformLocation(context);
+                context.uniform3f = handleUniform3f(context);
+                context.uniformMatrix4fv = handleUniformMatrix4fv(context);
+                context._hooked = true;
+            }
+            return context;
+        };
+    }
+
+    // 初始化函数
+    function initialize() {
+        // 注入样式
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = styles;
+        document.head.appendChild(styleSheet);
+
+        // 创建UI
+        const panel = createControlPanel();
+        document.body.appendChild(panel);
+        setTimeout(() => panel.classList.add('visible'), 500);
+
+        // 绑定WebGL钩子
+        hookWebGL();
+
+        // 初始化相机
+        resetCamera();
+
+        // 添加全局错误处理
+        window.addEventListener('error', (e) => {
+            log('Error', 'Script error:', e.message);
+        });
+    }
+
+    // 启动脚本
+    initialize();
+})();
