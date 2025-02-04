@@ -2,7 +2,7 @@
 // @name         Wooden Custom Ui for N1CN
 // @namespace    http://tampermonkey.net/
 // @version      1
-// @description  wooden theme
+// @description  wooden theme, made by T7 clan.
 // @author       N1CN
 // @match        https://narrow.one/*
 // @grant        GM_addStyle
