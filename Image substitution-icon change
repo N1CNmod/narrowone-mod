@@ -1,12 +1,10 @@
 // ==UserScript==
-// @name         Image substitution for N1CN
+// @name         Image substitution by CN clan
 // @namespace    http://tampermonkey.net/
 // @version      1
-// @description  Swap image assets on narrowone
+// @description  Swap image assets on narrowone(improved from the T7 version)
 // @author       N1CN
 // @match        https://narrow.one/*
-// @downloadURL  https://github.com/TheGirlThatLived/NarrowOne_Customizations/raw/refs/heads/main/Scripts/ImageSubstitution
-// @updateURL    https://github.com/TheGirlThatLived/NarrowOne_Customizations/raw/refs/heads/main/Scripts/ImageSubstitution
 // @grant        none
 // ==/UserScript==
 
