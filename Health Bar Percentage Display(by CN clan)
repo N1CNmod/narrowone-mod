@@ -2,7 +2,7 @@
 // @name         Health Bar Percentage Display(improved) by CN clan
 // @namespace    https://narrow.one/
 // @version      1
-// @description  Display a text percentage of current HP bar state (next to the HP bar).
+// @description  Display a text percentage of current HP bar state next to the HP bar. (improved the T7 mod)
 // @author       N1CN
 // @run-at       document-start
 // @match        https://narrow.one/
