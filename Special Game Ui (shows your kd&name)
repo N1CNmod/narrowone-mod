@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         Special Game Ui by CN clan
+// @name         Special Game Ui by T7
 // @namespace    http://tampermonkey.net/
 // @version      1
 // @description  Shows your kills&deaths and your name in the corner.
-// @author       N1CN
+// @author       T7mod
 // @match        https://narrow.one/*
 // @grant        GM_addStyle
 // ==/UserScript==
