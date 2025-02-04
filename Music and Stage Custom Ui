@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Music and Stage Custom Ui for N1CN
+// @name         Special Game Ui by CN clan
 // @namespace    http://tampermonkey.net/
 // @version      1
-// @description  Music and Stage Custom Ui for N1CN
+// @description  Shows your kills&deaths and your name in the corner.
 // @author       N1CN
 // @match        https://narrow.one/*
 // @grant        GM_addStyle
