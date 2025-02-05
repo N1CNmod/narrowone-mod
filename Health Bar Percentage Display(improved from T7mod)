@@ -3,7 +3,7 @@
 // @namespace    https://narrow.one/
 // @version      2
 // @description  Display a text percentage of current HP bar state next to the HP bar. (improved the T7 mod)
-// @author       Xeltalliv
+// @author       Xeltalliv & N1CN
 // @run-at       document-start
 // @match        https://narrow.one/
 // @icon         https://www.svgrepo.com/show/404891/broken-heart.svg
@@ -46,7 +46,7 @@ gameWrapperObserver.observe(document.getElementById("gameWrapper"), {
 
 function addHealthBar(element) {
     console.log("Added health bar", element);
-    element.append(heathTextDisplayElement);
+    element.append(healthTextDisplayElement);
 
     observedHealthBarPart = document.getElementsByClassName("health-ui-bar clip")[0];
     healthBarObserver.observe(observedHealthBarPart, {
