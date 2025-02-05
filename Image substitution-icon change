@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         Image substitution by CN&T7 clan
+// @name         Image substitution by Xeltalliv
 // @namespace    http://tampermonkey.net/
 // @version      1
 // @description  Swap image assets on narrowone(improved from the T7 version)
-// @author       N1CN&T7mod
+// @author       N1CN & Xeltalliv
 // @match        https://narrow.one/*
 // @grant        none
 // ==/UserScript==
