@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         Health Bar Percentage Display(improved) by Xeltalliv
+// @name         Health Bar Percentage Display(in 4 decimal place) for N1CN
 // @namespace    https://narrow.one/
-// @version      2
-// @description  Display a text percentage of current HP bar state next to the HP bar. (improved the T7 mod)
-// @author       Xeltalliv & N1CN
+// @version      1
+// @description  Display a text percentage of current HP bar state (next to the HP bar).
+// @author       N1CN
 // @run-at       document-start
 // @match        https://narrow.one/
 // @icon         https://www.svgrepo.com/show/404891/broken-heart.svg
@@ -62,5 +62,5 @@ function removeHealthBar(element) {
 }
 
 healthTextDisplayElement.style.color = "White"; // Change text color
-healthTextDisplayElement.style.fontSize = "25px"; // Change font size
-healthTextDisplayElement.style.fontWeight = "normal"; // Change text weight
+healthTextDisplayElement.style.fontSize = "20px"; // Change font size
+healthTextDisplayElement.style.fontWeight = "bold"; // Change text weight
