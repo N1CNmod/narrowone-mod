@@ -6,16 +6,25 @@ Welcome to the N1CN Narrow.one Custom User Interface, Image substitution and Sea
 
 What the Mod Does
 Custom User Interface: This mod provides a Custom User Interface with Chinese new year theme. (Partially borrowed from T7)
+
 Free Camera: Provides Advanced Camra Controls for players to spectate a match.
+
 Image substitution: The icon for flags and players will be changed. (Partially borrowed from T7)
+
 Sky Colour Change: Allow users to customize their sky colour.
+
 Dark World Ui: Make the entire world change into the dark theme.
+
 Foucs Mod: Allow users to Zoom in/out in the Game.
+
 Rainbow Arrow: Force rainbow arrow trail effect permanently
+
 Health Bar Percentage Display: Display a text percentage of current HP bar state (improved from Xeltalliv's version)
+
 No Physics Changes: This mod does not alter any game physics, ensuring a consistent gaming experience.
 
 Main Contributers:
+
 Wurenjun (wurenjun_cn)
 intdgy (intdgy)
 
