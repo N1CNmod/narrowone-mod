@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         Health Bar Percentage Display(improved) by T7 clan
+// @name         Health Bar Percentage Display(improved) by Xeltalliv
 // @namespace    https://narrow.one/
 // @version      2
 // @description  Display a text percentage of current HP bar state next to the HP bar. (improved the T7 mod)
-// @author       T7mod
+// @author       Xeltalliv
 // @run-at       document-start
 // @match        https://narrow.one/
 // @icon         https://www.svgrepo.com/show/404891/broken-heart.svg
