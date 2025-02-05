@@ -1,0 +1,550 @@
+// ==UserScript==
+// @name         Narrow.one Foucs Mod by CN Clan
+// @author       N1CN
+// @namespace    http://tampermonkey.net/
+// @version      3.4
+// @description  Zoom modes (Shift & Right-click)     AND PS: A guy who called infurness in the Narrow One Community is a scum lol. The Mod wouldn't have been so good if it hadn't been for his obstructions and insults.
+// @match        *://narrow.one/*
+// @run-at       document-start
+// @grant        none
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // ==============================
+    //   Global Control Variables
+    // ==============================
+    const DEBUG = true;
+    let shiftZoomScale = 2.0;    // Zoom scale for Shift key
+    let rightClickZoomScale = 2.0; // Zoom scale for right mouse button
+    let zoomTrigger = null;      // Current active zoom trigger
+    let isZooming = false;
+    let isPixelated = true;
+    let isPanelVisible = false;
+    let isPanelMinimized = false;
+
+    // FPS related variables
+    let lastFrameTime = 0;
+    let frameCount = 0;
+    const fpsHistory = new Array(60).fill(60);
+
+    // Set of hooked GL contexts
+    const hookedGLSet = new WeakSet();
+
+    // ==============================
+    //   Logging Function
+    // ==============================
+    function log(...args) {
+        if (DEBUG) console.log('[FOV Controller]', ...args);
+    }
+
+    // ==============================
+    //   1. Multi-Canvas Hook: Intercept getContext for both HTMLCanvasElement & OffscreenCanvas
+    // ==============================
+    hookCanvasPrototype(HTMLCanvasElement.prototype, 'HTMLCanvasElement');
+    if (window.OffscreenCanvas) {
+        hookCanvasPrototype(OffscreenCanvas.prototype, 'OffscreenCanvas');
+    }
+
+    function hookCanvasPrototype(canvasProto, label) {
+        const originalGetContext = canvasProto.getContext;
+        canvasProto.getContext = function(type, ...args) {
+            const ctx = originalGetContext.apply(this, [type, ...args]);
+            if (!ctx) return ctx;
+
+            if (type === 'webgl' || type === 'experimental-webgl' || type === 'webgl2') {
+                log(`Detected ${label} creating WebGL context:`, type);
+                if (!hookedGLSet.has(ctx)) {
+                    hookedGLSet.add(ctx);
+                    installWebGLHook(ctx);
+                }
+            }
+            return ctx;
+        };
+    }
+    // ==============================
+    //   2. Install WebGL Hook
+    // ==============================
+    function installWebGLHook(gl) {
+        try {
+            log('Installing WebGL Hook...');
+
+            // Save original functions
+            const originalUniformMatrix4fv = gl.uniformMatrix4fv;
+            const originalGetUniformLocation = gl.getUniformLocation;
+            const originalTexParameteri = gl.texParameteri;
+            const originalTexImage2D = gl.texImage2D;
+
+            // Cache: Some UniformLocations might be projection matrices
+            const uniformLocations = new Map();
+
+            // Modify texture filtering
+            gl.texParameteri = function(target, pname, param) {
+                if (isPixelated) {
+                    if (pname === gl.TEXTURE_MIN_FILTER) {
+                        param = gl.NEAREST;
+                    }
+                    if (pname === gl.TEXTURE_MAG_FILTER) {
+                        param = gl.NEAREST;
+                    }
+                }
+                return originalTexParameteri.call(this, target, pname, param);
+            };
+
+            // Intercept texture uploads
+            gl.texImage2D = function(...args) {
+                return originalTexImage2D.call(this, ...args);
+            };
+
+            // Intercept and cache all projection-related uniforms
+            gl.getUniformLocation = function(program, name) {
+                const location = originalGetUniformLocation.call(this, program, name);
+                if (location && (
+                    name.includes('projection') ||
+                    name.includes('Projection') ||
+                    name.includes('PROJECTION') ||
+                    name.includes('proj') ||
+                    name.includes('Proj')
+                )) {
+                    log('Found projection matrix uniform:', name, location);
+                    uniformLocations.set(location, { name, program });
+                }
+                return location;
+            };
+
+            // Intercept uniformMatrix4fv, only modify projection matrices
+            gl.uniformMatrix4fv = function(location, transpose, value) {
+                const info = uniformLocations.get(location);
+                if (info) {
+                    const newMatrix = modifyProjectionMatrix(value);
+                    return originalUniformMatrix4fv.call(this, location, transpose, newMatrix);
+                }
+                return originalUniformMatrix4fv.call(this, location, transpose, value);
+            };
+
+            log('WebGL Hook installation complete!');
+        } catch (e) {
+            log('Error during Hook installation:', e);
+        }
+    }
+
+    // ==============================
+    //   3. Update Projection Matrix Before Each Draw Call
+    // ==============================
+    function forceUpdateProjection(gl, program, programUniformsMap) {
+        if (!program || !programUniformsMap.has(program)) return;
+        const uniformsMap = programUniformsMap.get(program);
+
+        for (const [location, info] of uniformsMap.entries()) {
+            if (!info?.lastMatrix || info.lastMatrix.length !== 16) continue;
+            const newMatrix = modifyProjectionMatrix(info.lastMatrix);
+            gl.uniformMatrix4fv(location, false, newMatrix);
+        }
+    }
+
+    // ==============================
+    //   4. Advanced Projection Matrix Interpolation Algorithm
+    // ==============================
+    function modifyProjectionMatrix(matrix) {
+        try {
+            if (!matrix || matrix.length !== 16) return matrix;
+
+            // Initialize static variables
+            if (typeof modifyProjectionMatrix.currentScale === 'undefined') {
+                modifyProjectionMatrix.currentScale = 1.0;
+                modifyProjectionMatrix.originalMatrix = new Float32Array(matrix);
+                modifyProjectionMatrix.cachedMatrix = new Float32Array(16);
+            }
+
+            // Update original matrix if new matrix detected
+            if (matrix[0] !== modifyProjectionMatrix.originalMatrix[0] ||
+                matrix[5] !== modifyProjectionMatrix.originalMatrix[5]) {
+                modifyProjectionMatrix.originalMatrix.set(matrix);
+            }
+
+            const newMatrix = modifyProjectionMatrix.cachedMatrix;
+            const originalMatrix = modifyProjectionMatrix.originalMatrix;
+
+            // Calculate target scale
+            const targetScale = isZooming ?
+                (zoomTrigger === 'shift' ? shiftZoomScale : rightClickZoomScale) :
+                1.0;
+
+            // Smooth interpolation
+            if (Math.abs(modifyProjectionMatrix.currentScale - targetScale) > 0.001) {
+                modifyProjectionMatrix.currentScale += (targetScale - modifyProjectionMatrix.currentScale) * 0.15;
+            }
+            const clampedScale = Math.max(0.1, Math.min(5.0, modifyProjectionMatrix.currentScale));
+
+            // Maintain aspect ratio
+            const aspectRatio = originalMatrix[0] / originalMatrix[5];
+
+            // Calculate new matrix based on original, maintaining aspect ratio
+            newMatrix[0] = originalMatrix[0] * clampedScale;  // FOV X
+            newMatrix[5] = newMatrix[0] / aspectRatio;        // FOV Y
+
+            // Copy other values
+            for (let i = 0; i < 16; i++) {
+                if (i !== 0 && i !== 5) {
+                    newMatrix[i] = originalMatrix[i];
+                }
+            }
+
+            // Debug output
+            if (DEBUG && (!modifyProjectionMatrix.lastLog || Date.now() - modifyProjectionMatrix.lastLog > 1000)) {
+                log('Matrix modification:', {
+                    scale: clampedScale,
+                    aspectRatio: aspectRatio,
+                    fovX: {
+                        original: originalMatrix[0],
+                        current: matrix[0],
+                        new: newMatrix[0]
+                    },
+                    fovY: {
+                        original: originalMatrix[5],
+                        current: matrix[5],
+                        new: newMatrix[5]
+                    }
+                });
+                modifyProjectionMatrix.lastLog = Date.now();
+            }
+
+            return newMatrix;
+        } catch (error) {
+            console.error('Error modifying projection matrix:', error);
+            return matrix;
+        }
+    }
+    // ==============================
+    //   5. Create Control Panel UI
+    // ==============================
+    function createControlPanel() {
+        const style = document.createElement('style');
+        style.textContent = `
+            .fov-panel {
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                background: rgba(0, 0, 0, 0.8);
+                padding: 10px;
+                border-radius: 8px;
+                z-index: 999999;
+                color: white;
+                font-family: Arial, sans-serif;
+                transition: all 0.3s ease;
+                opacity: 0;
+                visibility: hidden;
+                transform: translateY(-10px);
+                user-select: none;
+                min-width: 200px;
+            }
+            .fov-panel.visible {
+                opacity: 1;
+                visibility: visible;
+                transform: translateY(0);
+            }
+            .fov-panel.minimized {
+                padding: 5px;
+                width: 30px;
+                height: 20px;
+                overflow: hidden;
+            }
+            .fov-panel input[type="range"] {
+                width: 150px;
+                margin: 10px 0;
+                cursor: pointer;
+            }
+            .fov-panel .minimize-btn {
+                position: absolute;
+                top: 5px;
+                right: 5px;
+                background: none;
+                border: none;
+                color: white;
+                cursor: pointer;
+                padding: 2px 6px;
+                font-size: 14px;
+            }
+            .fov-panel .minimize-btn:hover {
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 4px;
+            }
+            .zoom-section {
+                margin-bottom: 15px;
+                padding: 10px;
+                border-radius: 4px;
+                transition: background-color 0.3s ease;
+            }
+            .zoom-section.shift-active {
+                background-color: rgba(0, 255, 0, 0.1);
+            }
+            .zoom-section.rightclick-active {
+                background-color: rgba(0, 128, 255, 0.1);
+            }
+            .zoom-label {
+                font-size: 12px;
+                margin-bottom: 5px;
+                color: #fff;
+            }
+            .zoom-value {
+                font-size: 14px;
+                margin-bottom: 5px;
+                color: #fff;
+            }
+            .instructions {
+                font-size: 12px;
+                color: #aaa;
+                margin-top: 10px;
+                padding-top: 10px;
+                border-top: 1px solid rgba(255, 255, 255, 0.2);
+            }
+            .section-title {
+                font-size: 14px;
+                font-weight: bold;
+                margin-bottom: 8px;
+                color: #fff;
+            }
+        `;
+        document.head.appendChild(style);
+
+        const panel = document.createElement('div');
+        panel.className = 'fov-panel';
+
+        // Title section
+        const title = document.createElement('div');
+        title.className = 'section-title';
+        title.textContent = 'FOV Controller';
+
+        const minimizeBtn = document.createElement('button');
+        minimizeBtn.className = 'minimize-btn';
+        minimizeBtn.textContent = '−';
+        minimizeBtn.onclick = () => {
+            isPanelMinimized = !isPanelMinimized;
+            panel.classList.toggle('minimized');
+            minimizeBtn.textContent = isPanelMinimized ? '+' : '−';
+        };
+
+        const controls = document.createElement('div');
+        controls.className = 'controls';
+
+        // Shift key zoom section
+        const shiftSection = document.createElement('div');
+        shiftSection.className = 'zoom-section';
+
+        const shiftLabel = document.createElement('div');
+        shiftLabel.className = 'zoom-label';
+        shiftLabel.textContent = 'Shift Key Zoom';
+
+        const shiftZoomDisplay = document.createElement('div');
+        shiftZoomDisplay.className = 'zoom-value';
+        shiftZoomDisplay.textContent = `Zoom: ${shiftZoomScale.toFixed(2)}x`;
+
+        const shiftSlider = document.createElement('input');
+        shiftSlider.type = 'range';
+        shiftSlider.min = '0.2';
+        shiftSlider.max = '5.0';
+        shiftSlider.step = '0.1';
+        shiftSlider.value = shiftZoomScale;
+
+        // Right-click zoom section
+        const rightClickSection = document.createElement('div');
+        rightClickSection.className = 'zoom-section';
+
+        const rightClickLabel = document.createElement('div');
+        rightClickLabel.className = 'zoom-label';
+        rightClickLabel.textContent = 'Right-Click Zoom';
+
+        const rightClickZoomDisplay = document.createElement('div');
+        rightClickZoomDisplay.className = 'zoom-value';
+        rightClickZoomDisplay.textContent = `Zoom: ${rightClickZoomScale.toFixed(2)}x`;
+
+        const rightClickSlider = document.createElement('input');
+        rightClickSlider.type = 'range';
+        rightClickSlider.min = '0.2';
+        rightClickSlider.max = '5.0';
+        rightClickSlider.step = '0.1';
+        rightClickSlider.value = rightClickZoomScale;
+
+        // Slider event handlers
+        shiftSlider.oninput = (e) => {
+            shiftZoomScale = Number(e.target.value);
+            const effect = shiftZoomScale < 1 ? 'wider' : 'narrower';
+            shiftZoomDisplay.textContent = `Zoom: ${shiftZoomScale.toFixed(2)}x (${effect})`;
+            log('Shift zoom scale changed:', shiftZoomScale);
+        };
+
+        rightClickSlider.oninput = (e) => {
+            rightClickZoomScale = Number(e.target.value);
+            const effect = rightClickZoomScale < 1 ? 'wider' : 'narrower';
+            rightClickZoomDisplay.textContent = `Zoom: ${rightClickZoomScale.toFixed(2)}x (${effect})`;
+            log('Right-click zoom scale changed:', rightClickZoomScale);
+        };
+
+        // Performance stats
+        const performanceStats = document.createElement('div');
+        performanceStats.className = 'performance-stats';
+        setInterval(() => {
+            const avgFps = fpsHistory.reduce((a, b) => a + b) / 60;
+            performanceStats.textContent = `FPS: ${avgFps.toFixed(1)}`;
+        }, 1000);
+
+        // Instructions
+        const instructions = document.createElement('div');
+        instructions.className = 'instructions';
+        instructions.innerHTML = `
+            <b>Quick Guide:</b><br>
+            • Hold Shift to use green zoom<br>
+            • Hold Right-Click for blue zoom<br>
+            • Press Tab to show/hide panel<br>
+            • Adjust sliders to customize zoom levels<br>
+            • Values < 1.0 = wider view<br>
+            • Values > 1.0 = narrower view
+        `;
+
+        // Texture controls
+        const textureControls = document.createElement('div');
+        textureControls.style.marginTop = '10px';
+        textureControls.style.borderTop = '1px solid rgba(255, 255, 255, 0.2)';
+        textureControls.style.paddingTop = '10px';
+
+        const textureTitle = document.createElement('div');
+        textureTitle.className = 'zoom-label';
+        textureTitle.textContent = 'Texture Settings';
+
+        const pixelateCheckbox = document.createElement('input');
+        pixelateCheckbox.type = 'checkbox';
+        pixelateCheckbox.id = 'pixelate';
+        pixelateCheckbox.checked = isPixelated;
+        pixelateCheckbox.onchange = (e) => {
+            isPixelated = e.target.checked;
+            log('Texture pixelation:', isPixelated);
+        };
+
+        const pixelateLabel = document.createElement('label');
+        pixelateLabel.htmlFor = 'pixelate';
+        pixelateLabel.textContent = 'Enable Pixelation';
+        pixelateLabel.style.fontSize = '12px';
+        pixelateLabel.style.marginLeft = '5px';
+        // Assemble UI components
+        shiftSection.appendChild(shiftLabel);
+        shiftSection.appendChild(shiftZoomDisplay);
+        shiftSection.appendChild(shiftSlider);
+
+        rightClickSection.appendChild(rightClickLabel);
+        rightClickSection.appendChild(rightClickZoomDisplay);
+        rightClickSection.appendChild(rightClickSlider);
+
+        textureControls.appendChild(textureTitle);
+        textureControls.appendChild(pixelateCheckbox);
+        textureControls.appendChild(pixelateLabel);
+
+        controls.appendChild(title);
+        controls.appendChild(shiftSection);
+        controls.appendChild(rightClickSection);
+        controls.appendChild(performanceStats);
+        controls.appendChild(instructions);
+        controls.appendChild(textureControls);
+
+        panel.appendChild(minimizeBtn);
+        panel.appendChild(controls);
+        document.body.appendChild(panel);
+
+        // Add zoom state indicators
+        function updateZoomSections() {
+            shiftSection.classList.toggle('shift-active', isZooming && zoomTrigger === 'shift');
+            rightClickSection.classList.toggle('rightclick-active', isZooming && zoomTrigger === 'rightclick');
+        }
+        setInterval(updateZoomSections, 100);
+
+        return panel;
+    }
+
+    // ==============================
+    //   6. FPS Update Function
+    // ==============================
+    function updateFPS() {
+        const now = performance.now();
+        const delta = now - lastFrameTime;
+        lastFrameTime = now;
+        const fps = 1000 / delta;
+        fpsHistory[frameCount % 60] = fps;
+        frameCount++;
+    }
+
+    // ==============================
+    //   7. Initialize Script
+    // ==============================
+    function initialize() {
+        const panel = createControlPanel();
+
+        // Keyboard and mouse event handlers
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                isPanelVisible = !isPanelVisible;
+                panel.classList.toggle('visible');
+                log('Control panel:', isPanelVisible ? 'shown' : 'hidden');
+            }
+            if (e.key === 'Shift' && !e.repeat) {
+                isZooming = true;
+                zoomTrigger = 'shift';
+                log('Zoom started (Shift)');
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'Shift') {
+                isZooming = false;
+                zoomTrigger = null;
+                log('Zoom ended (Shift)');
+            }
+        });
+
+        document.addEventListener('mousedown', (e) => {
+            if (e.button === 2) {
+                isZooming = true;
+                zoomTrigger = 'rightclick';
+                log('Zoom started (Right-click)');
+            }
+        });
+
+        document.addEventListener('mouseup', (e) => {
+            if (e.button === 2) {
+                isZooming = false;
+                zoomTrigger = null;
+                log('Zoom ended (Right-click)');
+            }
+        });
+
+        document.addEventListener('mouseleave', () => {
+            if (isZooming) {
+                isZooming = false;
+                zoomTrigger = null;
+                log('Zoom ended (Mouse left window)');
+            }
+        });
+
+        // Disable context menu
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+        });
+
+        // Frame loop for FPS update
+        function tick() {
+            updateFPS();
+            requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+
+        log('Initialization complete, waiting for game render to trigger getContext Hook...');
+    }
+
+    // Start the script
+    if (document.readyState === 'loading' || document.readyState === 'uninitialized') {
+        document.addEventListener('DOMContentLoaded', initialize);
+    } else {
+        initialize();
+    }
+
+})();
