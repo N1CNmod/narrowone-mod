@@ -3,7 +3,7 @@
 // @namespace    https://narrow.one/
 // @version      1
 // @description  Display a text percentage of current HP bar state (next to the HP bar).
-// @author       N1CN
+// @author       Wurenjun & Xeltalliv
 // @run-at       document-start
 // @match        https://narrow.one/
 // @icon         https://www.svgrepo.com/show/404891/broken-heart.svg
