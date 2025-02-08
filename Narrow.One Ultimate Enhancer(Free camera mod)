@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         Narrow.One Ultimate Enhancer by CN Clan
 // @namespace    http://tampermonkey.net/
-// @version      2025-02-05
+// @version      2
 // @description  Advanced camera controls, dark mode and visual enhancements for narrow.one
-// @author       N1CN
+// @author       intdgy & Wurenjun
 // @match        https://narrow.one/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=narrow.one
 // @grant        unsafeWindow
@@ -122,7 +122,7 @@
     const styles = `
         .cn-control-panel {
             position: fixed;
-            top: 20px;
+            top: 320px;
             right: 20px;
             padding: 15px;
             background: rgba(33, 33, 33, 0.85);
@@ -425,13 +425,13 @@
             colorWheels
         );
 
-        // Tab键切换面板
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                panel.classList.toggle('visible');
-            }
-        });
+        // 改变运行指令到e
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'e') { // Changed from 'Tab' to 'e'
+        e.preventDefault();
+        panel.classList.toggle('visible');
+    }
+});
 
         return panel;
     }
