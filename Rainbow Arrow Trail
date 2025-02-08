@@ -3,6 +3,7 @@
 // @namespace    http://tampermonkey.net/
 // @version      1.0
 // @description  Force rainbow arrow trail effect permanently
+// @author       intdgy & Wurenjun
 // @match        https://narrow.one/
 // @grant        unsafeWindow
 // ==/UserScript==
