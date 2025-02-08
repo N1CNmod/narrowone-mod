@@ -3,7 +3,7 @@
 // @namespace    http://tampermonkey.net/
 // @version      1
 // @description  Swap image assets on narrowone(improved from the T7 version)
-// @author       N1CN & Xeltalliv
+// @author       Wurenjun & Xeltalliv
 // @match        https://narrow.one/*
 // @grant        none
 // ==/UserScript==
