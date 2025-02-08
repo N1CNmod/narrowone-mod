@@ -3,7 +3,7 @@
 // @namespace    http://tampermonkey.net/
 // @version      2025-02-02
 // @description  Continuously modify the sky color to black (customizable), customize hit effects colors, customize teammate identification colors, customize bow colors...
-// @author       N1CN
+// @author       intdgy
 // @match        https://narrow.one/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=narrow.one
 // @grant        unsafeWindow
