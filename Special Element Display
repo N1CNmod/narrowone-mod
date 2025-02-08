@@ -1,0 +1,53 @@
+// ==UserScript==
+// @name         Special Element Display by CN clan
+// @namespace    http://tampermonkey.net/
+// @version      1
+// @description  Shows your username at the main page and customize the text colour (inspired be T7mod).
+// @author       Wurenjun
+// @match        https://narrow.one/*
+// @grant        GM_addStyle
+// ==/UserScript==
+
+//添加fuction
+(function() {
+    'use strict';
+
+    // 添加CSS模型
+    GM_addStyle(`
+        /* main page */
+        div.buttonImage {
+            box-shadow: 0 0 20px 10px #00ffd0, 0 0 30px 15px #00ffd0, rgba(0, 0, 255, 0.1);
+        }
+        .main-menu-username {
+            color: #00ffd0;
+        }
+        .scoreOffsetNotificationAnim {
+            color: #00ffa6;
+            text-shadow: 0 0 10px #33801c, 0 0 20px #1f6e07, 0 0 30px #246b0e, 0 0 40px #246b0e;
+        }
+        }
+        .scoreOffsetNotificationScore {
+            color: #00ffd0;
+        }
+        .bottom-left-text {
+            font-size: 1.9rem;
+            position: fixed;
+            bottom: 9px;
+            right: 9px;
+            padding: 1.1rem;
+            background-color: rgba(15, 15, 15, 0.4);
+            color: #00ffa6;
+        }
+        div.dialog.dialogTitle {
+            color: #7b49f5;
+        }
+    `);
+
+    // 创建并附加左下方文本
+    var bottomLeftText = document.createElement('div');
+    bottomLeftText.className = 'bottom-left-text';
+    bottomLeftText.textContent = 'Wurenjun ';
+    document.body.appendChild(bottomLeftText);
+})();
+
+    //灵感来源于T7mod
