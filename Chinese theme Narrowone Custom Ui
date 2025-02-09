@@ -1,10 +1,167 @@
 // ==UserScript==
-// @name         Chinese theme Narrowone Background by CN&T7 clan
+// @name         Chinese theme Narrowone Background by CN clan
 // @namespace    http://tampermonkey.net/
-// @version      1
+// @version      2
 // @description  Chinese traditional new year theme
-// @author       N1CN&T7mod
+// @author       Wurenjun
 // @match        https://narrow.one/*
 // @grant        GM_addStyle
 // ==/UserScript==
-function _0x4588(_0x288265,_0x3935a8){var _0x552cb6=_0x552c();return _0x4588=function(_0x4588a4,_0x336add){_0x4588a4=_0x4588a4-0xc7;var _0x511ad4=_0x552cb6[_0x4588a4];return _0x511ad4;},_0x4588(_0x288265,_0x3935a8);}(function(_0x31760d,_0x470f8b){var _0x360585=_0x4588,_0x520472=_0x31760d();while(!![]){try{var _0x29a26e=-parseInt(_0x360585(0xdf))/0x1+-parseInt(_0x360585(0xe0))/0x2*(parseInt(_0x360585(0xe5))/0x3)+parseInt(_0x360585(0xe9))/0x4+-parseInt(_0x360585(0xd1))/0x5*(-parseInt(_0x360585(0xd6))/0x6)+-parseInt(_0x360585(0xe1))/0x7*(-parseInt(_0x360585(0xd4))/0x8)+-parseInt(_0x360585(0xe8))/0x9+parseInt(_0x360585(0xcb))/0xa;if(_0x29a26e===_0x470f8b)break;else _0x520472['push'](_0x520472['shift']());}catch(_0x61923){_0x520472['push'](_0x520472['shift']());}}}(_0x552c,0xae38f),(function(){'use strict';GM_addStyle('\x0a\x20\x20\x20\x20\x20\x20\x20\x20:root\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20--WoodImage:\x20url(https://i.ibb.co/Xpzt7LF/images-2.jpg);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20--WoodPaper:\x20url(https://i.ibb.co/2PZh1bj/paper.png);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20--WoodArrow:\x20url(https://i.ibb.co/tmpT9VW/Picture-1.png);\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20--PrimeColor:\x20#7af5d0;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20--Secondary:\#7af5d0;\x0a\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20.main-menu-corner-profile\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20position:\x20relative;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20width:\x20fit-content;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20height:\x20fit-content;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20display:\x20flex;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20flex-direction:\x20column;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20flex-wrap:\x20wrap;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20justify-content:\x20flex-start;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20align-items:\x20flex-start;\x0a\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20.main-menu-corner-profile::before\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20content:\x20\x22\x22;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20position:\x20absolute;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20width:\x20100%;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20height:\x20100%;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20background:\x20var(--WoodImage)\x20no-repeat\x20center\x20center;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20background-size:\x20cover;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20z-index:\x20-1;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20padding-right:\x201rem;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20padding-bottom:\x201rem;\x0a\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20.main-menu-button-container\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20position:\x20relative;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20width:\x20100%;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20height:\x20100%;\x0a\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20.main-menu-button-container::before\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20content:\x20\x22\x22;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20position:\x20absolute;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20top:\x200;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20left:\x200;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20width:\x20100%;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20height:\x20100%;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20background:\x20var(--WoodArrow)\x20no-repeat\x20center\x20center;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20background-size:\x20cover;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20z-index:\x20-1;\x0a\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20div.dialog.wrinkledPaper,.chat-container\x20,.health-ui-container,.dialog-button\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20padding:\x201rem;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20background:\x20var(--WoodPaper)\x20no-repeat\x20center\x20center;\x0a\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20/*\x20Other\x20styles\x20*/\x0a\x20\x20\x20\x20\x20\x20\x20\x20.avatar\x20{\x20padding:\x201.2rem;\x20border:\x205px\x20solid\x20#b69c09;\x20border-radius:\x2050px;\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20div.dialogText,h3.settings-group-header,.playersListTeamTable,.chat-container,.paged-view-page-header-title,.dialog-button,.kills-display,h2.dialogTitle,.squad-id,\x20h3.dialogTitle\x20,.settings-item-text,\x20.death-display\x20{\x20text-shadow:\x20-1px\x200\x20black,\x200\x201px\x20black,\x201px\x200\x20black,\x200\x20-1px\x20black,\x20-2px\x200\x20black,\x200\x202px\x20black,\x202px\x200\x20black,\x200\x20-2px\x20black;\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20.whiteBigText\x20{\x20color:\x20#7af5d0;\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20.kills-display,\x20.death-display{\x20\x20font-size:\x2021px;font-weight:\x20bold;\x20font-family:\x20AnglicanText,\x20Arial,\x20sans-serif;\x20\x20color:\x20#ea110a;\x20padding:\x205px;display:\x20block;\x20flex-grow:\x200;flex-shrink:\x202;\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20flex-basis:\x20auto;align-self:\x20auto;\x20order:\x200}\x0a\x20\x20\x20\x20\x20\x20\x20\x20.main-menu-button-text.blueNight\x20{\x20color:\x20var(\x20--PrimeColor);\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20h3.dialogTitle,.map-item-title,.paged-view-page-header-title{\x20color:\x20var(\x20--PrimeColor);\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20h2.dialogTitle,.dialog-button\x20{\x20color:\x20var(--Secondary);\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20div.dialogText\x20,.squad-id{\x20color:\x20#7af5d0;}\x0a\x20\x20\x20\x20\x20\x20\x20\x20h3.settings-group-header\x20{\x20\x20color:\x20var(--Secondary);\x20background:\x20transparent;\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20div.settings-item-text\x20,.chat-container{\x20color:\x20var(--Secondary);\x20}\x20.avatar{padding:1.2rem;\x20border:\x205px\x20solid\x20#b69c09;\x20border-radius:50px;}\x0a\x20\x20\x20\x20\x20\x20\x20\x20thead,.shopItemUsage-shop,.shop-skin-selection-item,.shop-class-selection-item,.playersListTeamTable{background:\x20transparent;}\x0a\x20\x20\x20\x20');async function _0x1e0074(){var _0x1bd74b=_0x4588;await new Promise(_0x5c3d6f=>setTimeout(_0x5c3d6f,0x7d0));var _0x94d377=indexedDB['open'](_0x1bd74b(0xe7));_0x94d377[_0x1bd74b(0xd0)]=function(_0x36bbdf){var _0x5d6248=_0x1bd74b;console[_0x5d6248(0xcc)]('Failed\x20to\x20open\x20the\x20database:',_0x36bbdf[_0x5d6248(0xd8)][_0x5d6248(0xe3)]);},_0x94d377['onsuccess']=function(_0x36696c){var _0x2efd8e=_0x1bd74b,_0x3abe14=_0x36696c[_0x2efd8e(0xd8)][_0x2efd8e(0xce)],_0x20e482=_0x3abe14[_0x2efd8e(0xd3)]([_0x2efd8e(0xe6)],_0x2efd8e(0xdd)),_0x54bb5f=_0x20e482[_0x2efd8e(0xcd)](_0x2efd8e(0xe6)),_0x25e916=_0x54bb5f[_0x2efd8e(0xdb)]('cachedProfileState');_0x25e916[_0x2efd8e(0xe4)]=function(_0x5e9138){var _0x8e3152=_0x2efd8e,_0x40fa5f=_0x5e9138[_0x8e3152(0xd8)]['result'];const _0x2729cb=JSON[_0x8e3152(0xc8)](_0x40fa5f[_0x8e3152(0xcf)][_0x8e3152(0xd7)]),_0x274c0c=JSON[_0x8e3152(0xc8)](_0x40fa5f['stats'][_0x8e3152(0xda)]);var _0x36a7fc=document[_0x8e3152(0xc9)](_0x8e3152(0xea));if(_0x36a7fc){var _0x3164ac=document['createElement'](_0x8e3152(0xc7)),_0x392c36=document[_0x8e3152(0xd2)](_0x8e3152(0xc7));_0x3164ac['textContent']=_0x8e3152(0xdc)+_0x2729cb,_0x3164ac['className']=_0x8e3152(0xd9),_0x392c36[_0x8e3152(0xde)]='Deaths:\x20'+_0x274c0c,_0x392c36['className']=_0x8e3152(0xd5),_0x36a7fc[_0x8e3152(0xe2)](_0x3164ac),_0x36a7fc[_0x8e3152(0xe2)](_0x392c36);}else console[_0x8e3152(0xcc)]('Element\x20.main-menu-corner-profile\x20not\x20found.');},_0x25e916[_0x2efd8e(0xd0)]=function(_0x18b036){var _0x51673f=_0x2efd8e;console[_0x51673f(0xcc)](_0x51673f(0xca),_0x18b036[_0x51673f(0xd8)][_0x51673f(0xe3)]);};};}_0x1e0074();}()));function _0x552c(){var _0x5a0d21=['545ErlYTI','createElement','transaction','22648gMQalM','death-display','19002KUsdhp','kills','target','kills-display','deaths','get','Kills:\x20','readwrite','textContent','437757vYqYXJ','136XywDLb','2926UlsoJA','appendChild','errorCode','onsuccess','14292kZdZES','keyValues','keyValuesDb','6476166CJxdTr','1182400haRZyC','.main-menu-corner-profile','div','stringify','querySelector','Error\x20retrieving\x20data:','3707370vZJVLb','error','objectStore','result','stats','onerror'];_0x552c=function(){return _0x5a0d21;};return _0x552c();}
+
+(function() {
+    'use strict';
+
+    // 为主题添加自定义样式
+    GM_addStyle(`
+        :root {
+            --NewYearCultureImage: url(https://i.ibb.co/Xpzt7LF/images-2.jpg);
+            --NewYearCulturePaper: url(https://i.ibb.co/2PZh1bj/paper.png);
+            --NewYearCultureArrow: url(https://i.ibb.co/tmpT9VW/Picture-1.png);
+            --PrimeColor: #7af5d0;
+            --Secondary: #71f5cd;
+        }
+
+        .main-menu-corner-profile {
+            position: relative;
+            width: fit-content;
+            height: fit-content;
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            align-items: flex-start;
+        }
+
+        .main-menu-corner-profile::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: var(--NewYearCultureImage) no-repeat center center;
+            background-size: cover;
+            z-index: -1;
+            padding-right: 1rem;
+            padding-bottom: 1rem;
+        }
+
+        .main-menu-button-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .main-menu-button-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--NewYearCultureArrow) no-repeat center center;
+            background-size: cover;
+            z-index: -1;
+        }
+
+        div.dialog.wrinkledPaper, .chat-container, .health-ui-container, .dialog-button {
+            padding: 1rem;
+            background: var(--NewYearCulturePaper) no-repeat center center;
+        }
+
+        /* Other styles */
+        .avatar {
+            padding: 1.2rem;
+            border: 5px solid #b69c09;
+            border-radius: 50px;
+        }
+
+        div.dialogText, h3.settings-group-header, .playersListTeamTable, .chat-container, .paged-view-page-header-title, .dialog-button, .kills-display, h2.dialogTitle, .squad-id, h3.dialogTitle, .settings-item-text, .death-display {
+            text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black, -2px 0 black, 0 2px black, 2px 0 black, 0 -2px black;
+        }
+
+        .whiteBigText {
+            color: #7af5d0;
+        }
+
+        .kills-display, .death-display {
+            font-size: 21px;
+            font-weight: bold;
+            font-family: AnglicanText, Arial, sans-serif;
+            color: #7af5d0;
+            padding: 5px;
+            display: block;
+            flex-grow: 0;
+            flex-shrink: 2;
+            flex-basis: auto;
+            align-self: auto;
+            order: 0;
+        }
+
+        .main-menu-button-text.blueNight {
+            color: var(--PrimeColor);
+        }
+
+        h3.dialogTitle, .map-item-title, .paged-view-page-header-title {
+            color: var(--PrimeColor);
+        }
+
+        h2.dialogTitle, .dialog-button {
+            color: var(--Secondary);
+        }
+
+        div.dialogText, .squad-id {
+            color: #7af5d0;
+        }
+
+        h3.settings-group-header {
+            color: var(--Secondary);
+            background: transparent;
+        }
+
+        div.settings-item-text, .chat-container {
+            color: var(--Secondary);
+        }
+    `);
+
+    // 处理数据库操作的功能
+    async function handleDatabase() {
+        await new Promise(resolve => setTimeout(resolve, 200));
+        let openRequest = indexedDB.open('keyValuesDb');
+
+        openRequest.onerror = function(event) {
+            console.error('Failed to open the database:', event.target.errorCode);
+        };
+
+        openRequest.onsuccess = function(event) {
+            let db = event.target.result;
+            let transaction = db.transaction(['cachedProfileState'], 'readwrite');
+            let objectStore = transaction.objectStore('cachedProfileState');
+            let getRequest = objectStore.get('cachedProfileState');
+
+            getRequest.onsuccess = function(event) {
+                let result = event.target.result;
+                const profileData = JSON.parse(result.profile);
+                const statsData = JSON.parse(result.stats);
+                let profileContainer = document.querySelector('.main-menu-corner-profile');
+
+                if (profileContainer) {
+                    let killsElement = document.createElement('div');
+                    let deathsElement = document.createElement('div');
+                    killsElement.textContent = 'Kills: ' + profileData.kills;
+                    killsElement.className = 'kills-display';
+                    deathsElement.textContent = 'Deaths: ' + statsData.deaths;
+                    deathsElement.className = 'death-display';
+                    profileContainer.appendChild(killsElement);
+                    profileContainer.appendChild(deathsElement);
+                } else {
+                    console.error('Element .main-menu-corner-profile not found.');
+                }
+            };
+
+            getRequest.onerror = function(event) {
+                console.error('Error retrieving data:', event.target.error);
+            };
+        };
+    }
+
+    handleDatabase();
+})();
