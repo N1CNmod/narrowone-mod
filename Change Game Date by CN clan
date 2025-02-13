@@ -1,0 +1,45 @@
+// ==UserScript==
+// @name         Change Game Date for N1CN
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  Change the game date to any day of the year!
+// @author       Galaxy
+// @match        https://narrow.one/*
+// @grant        none
+// @run-at       document-end
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // Create a simple UI to select the date
+    const datePicker = document.createElement('input');
+    datePicker.type = 'date';
+    datePicker.style.position = 'fixed';
+    datePicker.style.top = '10px';
+    datePicker.style.right = '10px';
+    datePicker.style.zIndex = '9999';
+    datePicker.style.padding = '5px';
+    const applyButton = document.createElement('button');
+    applyButton.innerText = 'Set Date';
+    applyButton.style.position = 'fixed';
+    applyButton.style.top = '40px';
+    applyButton.style.right = '10px';
+    applyButton.style.zIndex = '9999';
+    applyButton.style.padding = '5px';
+
+    document.body.appendChild(datePicker);
+    document.body.appendChild(applyButton);
+
+    // Function to handle the date change
+    applyButton.onclick = function() {
+        const selectedDate = new Date(datePicker.value);
+        if (!isNaN(selectedDate)) {
+            // Here you would normally call the game's API to set the date
+            alert(`Date changed to: ${selectedDate.toDateString()}`);
+            // Example: Update game state with the selected date
+            // updateGameDate(selectedDate);
+        } else {
+            alert('Please select a valid date.');
+        }
+    };
