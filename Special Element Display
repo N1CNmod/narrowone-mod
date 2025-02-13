@@ -49,7 +49,7 @@
     // Create and append bottom left text
     var bottomLeftText = document.createElement('div');
     bottomLeftText.className = 'bottom-left-text';
-    bottomLeftText.textContent = 'Enter your name ';
+    bottomLeftText.textContent = '𝕮𝕹';
     document.body.appendChild(bottomLeftText);
 })();
 
