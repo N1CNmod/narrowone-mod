@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Chinese theme Narrowone Background by CN clan
 // @namespace    http://tampermonkey.net/
-// @version      2
+// @version      3
 // @description  Chinese traditional new year theme
 // @author       Wurenjun
 // @match        https://narrow.one/*
@@ -21,16 +21,15 @@
             --Secondary: #71f5cd;
         }
 
-        .main-menu-corner-profile {
-            position: relative;
-            width: fit-content;
-            height: fit-content;
-            display: flex;
-            flex-direction: column;
-            flex-wrap: wrap;
-            justify-content: flex-start;
-            align-items: flex-start;
-        }
+      .main-menu-corner-profile {
+       position: relative;
+       width: fit-content;
+       height: fit-content;
+       display: grid; /* Uses CSS Grid layout */
+       grid-template-columns: repeat(2, 1fr); /* Creates two equal columns */
+       gap: 10px; /* Adds space between grid items */
+       padding: 10px; /* Adds padding */
+       }
 
         .main-menu-corner-profile::before {
             content: "";
@@ -44,6 +43,127 @@
             padding-bottom: 1rem;
         }
 
+        .main-menu-button-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .main-menu-button-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--NewYearCultureArrow) no-repeat center center;
+            background-size: cover;
+            z-index: -1;
+        }
+
+        div.dialog.wrinkledPaper, .chat-container, .health-ui-container, .dialog-button {
+            padding: 1rem;
+            background: var(--NewYearCulturePaper) no-repeat center center;
+        }
+
+        /* Other styles */
+        .avatar {
+            padding: 1.2rem;
+            border: 5px solid #b69c09;
+            border-radius: 50px;
+        }
+
+        div.dialogText, h3.settings-group-header, .playersListTeamTable, .chat-container, .paged-view-page-header-title, .dialog-button, .kills-display, h2.dialogTitle, .squad-id, h3.dialogTitle, .settings-item-text, .death-display {
+            text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black, -2px 0 black, 0 2px black, 2px 0 black, 0 -2px black;
+        }
+
+        .whiteBigText {
+            color: #7af5d0;
+        }
+
+        .kills-display, .death-display {
+            font-size: 21px;
+            font-weight: bold;
+            font-family: AnglicanText, Arial, sans-serif;
+            color: #7af5d0;
+            padding: 5px;
+            display: block;
+            flex-grow: 0;
+            flex-shrink: 2;
+            flex-basis: auto;
+            align-self: auto;
+            order: 0;
+        }
+
+        .main-menu-button-text.blueNight {
+            color: var(--PrimeColor);
+        }
+
+        h3.dialogTitle, .map-item-title, .paged-view-page-header-title {
+            color: var(--PrimeColor);
+        }
+
+        h2.dialogTitle, .dialog-button {
+            color: var(--Secondary);
+        }
+
+        div.dialogText, .squad-id {
+            color: #7af5d0;
+        }
+
+        h3.settings-group-header {
+            color: var(--Secondary);
+            background: transparent;
+        }
+
+        div.settings-item-text, .chat-container {
+            color: var(--Secondary);
+        }
+    `);
+
+    // 处理数据库操作的功能
+    async function handleDatabase() {
+        await new Promise(resolve => setTimeout(resolve, 200));
+        let openRequest = indexedDB.open('keyValuesDb');
+
+        openRequest.onerror = function(event) {
+            console.error('Failed to open the database:', event.target.errorCode);
+        };
+
+        openRequest.onsuccess = function(event) {
+            let db = event.target.result;
+            let transaction = db.transaction(['cachedProfileState'], 'readwrite');
+            let objectStore = transaction.objectStore('cachedProfileState');
+            let getRequest = objectStore.get('cachedProfileState');
+
+            getRequest.onsuccess = function(event) {
+                let result = event.target.result;
+                const profileData = JSON.parse(result.profile);
+                const statsData = JSON.parse(result.stats);
+                let profileContainer = document.querySelector('.main-menu-corner-profile');
+
+                if (profileContainer) {
+                    let killsElement = document.createElement('div');
+                    let deathsElement = document.createElement('div');
+                    killsElement.textContent = 'Kills: ' + profileData.kills;
+                    killsElement.className = 'kills-display';
+                    deathsElement.textContent = 'Deaths: ' + statsData.deaths;
+                    deathsElement.className = 'death-display';
+                    profileContainer.appendChild(killsElement);
+                    profileContainer.appendChild(deathsElement);
+                } else {
+                    console.error('Element .main-menu-corner-profile not found.');
+                }
+            };
+
+            getRequest.onerror = function(event) {
+                console.error('Error retrieving data:', event.target.error);
+            };
+        };
+    }
+
+    handleDatabase();
+})();
         .main-menu-button-container {
             position: relative;
             width: 100%;
