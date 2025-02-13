@@ -2,8 +2,8 @@
 // @name         Rainbow Arrow Trail by CN clan
 // @namespace    http://tampermonkey.net/
 // @version      1.0
+// @authur       intdgy
 // @description  Force rainbow arrow trail effect permanently
-// @author       intdgy & Wurenjun
 // @match        https://narrow.one/
 // @grant        unsafeWindow
 // ==/UserScript==
@@ -11,11 +11,9 @@
 (function() {
     'use strict';
 
-    const _0x1a2b = () => new Date(Date.UTC(2024, 4, 11, 12)).getTime();
-    const _0x3c4d = unsafeWindow;
+    unsafeWindow.Date.now = function() {
+        return new Date(Date.UTC(2024, 4, 11, 12)).getTime();
+    };
 
-    (function(_0x4f5a) {
-        _0x4f5a.Date.now = _0x1a2b;
-    })(_0x3c4d);
 
 })();
