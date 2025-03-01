@@ -3,7 +3,7 @@
 // @namespace    http://tampermonkey.net/
 // @version      2
 // @description  Advanced camera controls, dark mode and visual enhancements for narrow.one
-// @author       intdgy & Wurenjun
+// @author       N1CN
 // @match        https://narrow.one/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=narrow.one
 // @grant        unsafeWindow
@@ -427,7 +427,7 @@
 
         // 改变运行指令到e
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'e') { // Changed from 'Tab' to 'e'
+    if (e.key === 'E') { // Changed from 'Tab' to 'e'
         e.preventDefault();
         panel.classList.toggle('visible');
     }
