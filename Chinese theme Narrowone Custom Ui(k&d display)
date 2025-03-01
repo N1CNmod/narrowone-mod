@@ -1,0 +1,49 @@
+// ==UserScript==
+// @name         Chinese theme Narrowone Background for N1CN (k&d display)
+// @namespace    http://tampermonkey.net/
+// @version      1
+// @description  Chinese traditional new year theme
+// @author       Wurenjun
+// @match        https://narrow.one/*
+// @grant        GM_addStyle
+// ==/UserScript==
+(function () {
+  'use strict';
+
+  GM_addStyle("\n        :root {\n            --CNYImage: url(https://i.ibb.co/Xpzt7LF/images-2.jpg);\n            --CNYPaper: url(https://i.ibb.co/2PZh1bj/paper.png);\n            --CNYArrow: url(https://i.ibb.co/tmpT9VW/Picture-1.png);\n            --PrimeColor: #7af5d0;\n            --Secondary:#7af5d0;\n        }\n\n        .main-menu-corner-profile {\n            position: relative;\n            width: fit-content;\n            height: fit-content;\n            display: flex;\n            flex-direction: column;\n            flex-wrap: wrap;\n            justify-content: flex-start;\n            align-items: flex-start;\n        }\n\n        .main-menu-corner-profile::before {\n            content: \"\";\n            position: absolute;\n            width: 100%;\n            height: 100%;\n            background: var(--CNYImage) no-repeat center center;\n            background-size: cover;\n            z-index: -1;\n            padding-right: 1rem;\n            padding-bottom: 1rem;\n        }\n\n        .main-menu-button-container {\n            position: relative;\n            width: 100%;\n            height: 100%;\n        }\n\n        .main-menu-button-container::before {\n            content: \"\";\n            position: absolute;\n            top: 0;\n            left: 0;\n            width: 100%;\n            height: 100%;\n            background: var(--CNYArrow) no-repeat center center;\n            background-size: cover;\n            z-index: -1;\n        }\n\n        div.dialog.wrinkledPaper,.chat-container ,.health-ui-container,.dialog-button {\n            padding: 1rem;\n            background: var(--CNYPaper) no-repeat center center;\n        }\n\n\n        /* Other styles */\n        .avatar { padding: 1.2rem; border: 5px solid #b69c09; border-radius: 50px; }\n        div.dialogText,h3.settings-group-header,.playersListTeamTable,.chat-container,.paged-view-page-header-title,.dialog-button,.kills-display,h2.dialogTitle,.squad-id, h3.dialogTitle ,.settings-item-text, .death-display { text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black, -2px 0 black, 0 2px black, 2px 0 black, 0 -2px black; }\n        .whiteBigText { color: #7af5d0; }\n         .kills-display, .death-display{  font-size: 21px;font-weight: bold; font-family: AnglicanText, Arial, sans-serif;  color: #ea110a; padding: 5px;display: block; flex-grow: 0;flex-shrink: 2;\n            flex-basis: auto;align-self: auto; order: 0}\n        .main-menu-button-text.blueNight { color: var( --PrimeColor); }\n        h3.dialogTitle,.map-item-title,.paged-view-page-header-title{ color: var( --PrimeColor); }\n        h2.dialogTitle,.dialog-button { color: var(--Secondary);  }\n        div.dialogText ,.squad-id{ color: #7af5d0;}\n        h3.settings-group-header {  color: var(--Secondary); background: transparent; }\n        div.settings-item-text ,.chat-container{ color: var(--Secondary); } .avatar{padding:1.2rem; border: 5px solid #b69c09; border-radius:50px;}\n        thead,.shopItemUsage-shop,.shop-skin-selection-item,.shop-class-selection-item,.playersListTeamTable{background: transparent;}\n    ");
+  async function _0x1e0074() {
+    await new Promise(_0x5c3d6f => setTimeout(_0x5c3d6f, 0x7d0));
+    var _0x94d377 = indexedDB.open("keyValuesDb");
+    _0x94d377.onerror = function (_0x36bbdf) {
+      console.error("Failed to open the database:", _0x36bbdf.target.errorCode);
+    };
+    _0x94d377.onsuccess = function (_0x36696c) {
+      var _0x3abe14 = _0x36696c.target.result;
+      var _0x20e482 = _0x3abe14.transaction(["keyValues"], "readwrite");
+      var _0x54bb5f = _0x20e482.objectStore("keyValues");
+      var _0x25e916 = _0x54bb5f.get('cachedProfileState');
+      _0x25e916.onsuccess = function (_0x5e9138) {
+        var _0x40fa5f = _0x5e9138.target.result;
+        const _0x2729cb = JSON.stringify(_0x40fa5f.stats.kills);
+        const _0x274c0c = JSON.stringify(_0x40fa5f.stats.deaths);
+        var _0x36a7fc = document.querySelector(".main-menu-corner-profile");
+        if (_0x36a7fc) {
+          var _0x3164ac = document.createElement("div");
+          var _0x392c36 = document.createElement("div");
+          _0x3164ac.textContent = "Kills: " + _0x2729cb;
+          _0x3164ac.className = "kills-display";
+          _0x392c36.textContent = "Deaths: " + _0x274c0c;
+          _0x392c36.className = "death-display";
+          _0x36a7fc.appendChild(_0x3164ac);
+          _0x36a7fc.appendChild(_0x392c36);
+        } else {
+          console.error("Element .main-menu-corner-profile not found.");
+        }
+      };
+      _0x25e916.onerror = function (_0x18b036) {
+        console.error("Error retrieving data:", _0x18b036.target.errorCode);
+      };
+    };
+  }
+  _0x1e0074();
+})();
