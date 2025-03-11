@@ -27,6 +27,7 @@ Main Contributers:
 
 Wurenjun (wurenjun_cn)
 intdgy (intdgy)
+parrol(justague)
 
 Reminder:
 You can only use this mod on your own responsibility
