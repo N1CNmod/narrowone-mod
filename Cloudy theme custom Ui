@@ -1,0 +1,125 @@
+/ ==UserScript==
+// @name         Cloudy Narrowone theme by CN clan 
+// @namespace    http://tampermonkey.net/
+// @version      1
+// @description  Shows your username, KD and avator at the main page
+// @author       parrol & Wurenjun
+// @match        https://narrow.one/*
+// @grant        GM_addStyle
+// ==/UserScript==
+
+//添加fuction
+(function() {
+    'use strict';
+
+    GM_addStyle(`
+        /* main page */
+        div.buttonImage {
+            box-shadow: 0 0 20px 10px #00ffd0, 0 0 30px 15px #00ffd0, rgba(0, 0, 255, 0.1);
+        }
+        .main-menu-username {
+            color: #00ffd0;
+        }
+        .scoreOffsetNotificationAnim {
+            color: #00ffa6;
+            text-shadow: 0 0 10px #8327ab, 0 0 20px #6a138f, 0 0 30px #470663, 0 0 40px #470663;
+        }
+        }
+        .scoreOffsetNotificationScore {
+            color: #00ffd0;
+        }
+        .bottom-left-text {
+            font-size: 2rem;
+            position: fixed;
+            border-radius: 25px; /* Bo góc */
+            bottom: 9px;
+            right: 9px;
+            padding: 1.1rem;
+            background-color: rgba(15, 15, 15, 0.4);
+            color: #00ffa6;
+        }
+        div.dialog.dialogTitle {
+            color: #7b49f5;
+        }
+        .main-menu-corner-profile .avatar {
+            background-image: url(https://i.ibb.co/twSx3g1z/Logo-of-CN-2.png);
+            background-size: cover;
+            padding: 1.2rem;
+            border: 5px solid #b69c09;
+            border-radius: 50px;
+}
+    `);
+
+    var bottomLeftText = document.createElement('div');
+    bottomLeftText.className = 'bottom-left-text';
+    bottomLeftText.textContent = 'N1CN ';
+    document.body.appendChild(bottomLeftText);
+})();
+
+
+(function() {
+    'use strict';
+
+GM_addStyle(`
+    .dialog.wrinkledPaper,
+    .chat-container,
+    .main-menu-button-container,
+    .health-ui-container,
+    .dialog-button {
+        position: flex;
+        border-radius: 20px; /* Bo góc */
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(5px);
+        border-image: linear-gradient(45deg, red, orange);
+        overflow: visible; /* Đảm bảo không bị cắt nội dung bên trong */
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+
+    }
+`);
+})();
+
+
+GM_addStyle(`
+.kills-display, .death-display{  font-size: 21px;font-weight: bold; font-family: AnglicanText, Arial, sans-serif;  color:#03fcb6; padding: 5px;display: block; flex-grow: 0;flex-shrink: 2;\n
+
+`);
+
+
+ async function _0x1e0074() {
+    await new Promise(_0x5c3d6f => setTimeout(_0x5c3d6f, 0x7d0));
+    var _0x94d377 = indexedDB.open("keyValuesDb");
+    _0x94d377.onerror = function (_0x36bbdf) {
+      console.error("Failed to open the database:", _0x36bbdf.target.errorCode);
+    };
+    _0x94d377.onsuccess = function (_0x36696c) {
+      var _0x3abe14 = _0x36696c.target.result;
+      var _0x20e482 = _0x3abe14.transaction(["keyValues"], "readwrite");
+      var _0x54bb5f = _0x20e482.objectStore("keyValues");
+      var _0x25e916 = _0x54bb5f.get('cachedProfileState');
+      _0x25e916.onsuccess = function (_0x5e9138) {
+        var _0x40fa5f = _0x5e9138.target.result;
+        const _0x2729cb = JSON.stringify(_0x40fa5f.stats.kills);
+        const _0x274c0c = JSON.stringify(_0x40fa5f.stats.deaths);
+        var _0x36a7fc = document.querySelector(".main-menu-corner-profile");
+        if (_0x36a7fc) {
+          var _0x3164ac = document.createElement("div");
+          var _0x392c36 = document.createElement("div");
+          _0x3164ac.textContent = "Kills: " + _0x2729cb;
+          _0x3164ac.className = "kills-display";
+          _0x392c36.textContent = "Deaths: " + _0x274c0c;
+          _0x392c36.className = "death-display";
+          _0x36a7fc.appendChild(_0x3164ac);
+          _0x36a7fc.appendChild(_0x392c36);
+        } else {
+          console.error("Element .main-menu-corner-profile not found.");
+        }
+      };
+      _0x25e916.onerror = function (_0x18b036) {
+        console.error("Error retrieving data:", _0x18b036.target.errorCode);
+      };
+    };
+  }
+  _0x1e0074();
+
+
