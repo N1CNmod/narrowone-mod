@@ -1,0 +1,32 @@
+// ==UserScript==
+// @name         Summer Theme Profile Background Design by CN clan
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @author       ραɾɾοɭ
+// @description  Apply custom styling to the profile menu
+// @match        https://narrow.one/
+// @grant        GM_addStyle
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // Add the CSS to the page
+    GM_addStyle(`
+        .main-menu-corner-profile {
+            width: 300px !important;
+            display: flex !important;
+            gap: 10px !important;
+            margin: 10px !important;
+            padding: 10px !important;
+            background: transparent !important;
+            align-items: center !important;
+            cursor: pointer !important;
+            pointer-events: auto !important;
+            backdrop-filter: blur(15px) !important;
+            border-radius: 30px !important;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5) !important;
+            background-image: url(https://cdn.discordapp.com/attachments/1345596253546741790/1351928795463942144/download_3_1.jpg?ex=67dc294e&is=67dad7ce&hm=6550c054cbd5a4edfbcfe29c24a7f5145bffd219b6639b38cfcdce9822d1ac05) !important; /* Change image here */
+        }
+    `);
+})();
