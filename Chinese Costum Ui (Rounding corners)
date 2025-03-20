@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Chinese Costum Ui (Rounding corners)
+// @name         Chinese Custum Ui (Rounding corners)
 // @namespace    http://tampermonkey.net/
 // @version      1
 // @description  Thêm viền cầu vồng và nền blur 30px vào các container UI
