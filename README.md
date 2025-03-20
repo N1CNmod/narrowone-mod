@@ -29,7 +29,7 @@ Wurenjun (wurenjun_cn)
 
 intdgy (intdgy)
 
-parrol(justague)
+parrol (justague)
 
 # Links
 N1CN discord server: discord.gg/zrWcRSJRJk
