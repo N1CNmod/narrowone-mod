@@ -14,7 +14,7 @@ Our developers will be helping you all the time.
 
 We welcome people to use our code and share them with friends. This means a lot to us. It shows support and kindness in the community.
 
-However, copywrite will be strictly prohibited. We don't allow anyone to name or codes as theirselves. If you dare to do that, you will be warned and getting an email from GitHub.
+However, copywrite will be strictly prohibited. We don't allow anyone to name our codes as theirselves. If you dare to do that, you will be warned and getting an email from GitHub.
 
 # By N1CNmod
 
