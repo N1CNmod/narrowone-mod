@@ -41,7 +41,8 @@ Intro to N1CN: https://n1cn.mystrikingly.com/
 # Study Resources(For coders)
 JavaScript & CSS: https://www.w3schools.com/JS/
 
-Beginner coding: code.org
+Beginner coding: [code.org](https://code.org/)
+                https://www.freecodecamp.org/
 
 Avalible ai tool(might help): https://chat.deepseek.com/
 
