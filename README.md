@@ -32,7 +32,7 @@ intdgy (intdgy)
 parrol (justague)
 
 # Links
-N1CN discord server: discord.gg/zrWcRSJRJk
+N1CN discord server: [discord.gg/zrWcRSJRJk](https://discord.com/invite/zrWcRSJRJk)
 
 N1CN itch: https://n1cn.itch.io/
 
