@@ -29,7 +29,7 @@ We welcome everyone to take a look at our scripts and learn them. We did not add
 
 # Main Contributers:
 
-Wurenjun (wurenjun_cn)(https://www.youtube.com/@N1-Wurenjun))
+[Wurenjun (wurenjun_cn)](https://www.youtube.com/@N1-Wurenjun)
 
 intdgy (intdgy)
 
