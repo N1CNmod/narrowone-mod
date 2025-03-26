@@ -2,7 +2,7 @@
 This is a game mod for narrow.one Custom Ui, Special Icon and more Unique features. We suggest N1CN members to use this in gameplays.
 
 # Overview
-Welcome to the N1CN Mod. This mod is designed for Narrowone (especially N1CN) players. We hope everyone can manage to get a cool mods made by us.
+Welcome to the N1CN Mod. This mod is designed for Narrowone (especially N1CN) players. We hope everyone can manage to get a cool mods made by us. 
 
 # What the Mod Does
 Custom User Interface: This mod provides a Custom User Interface with Chinese new year theme. (Partially borrowed from T7)
@@ -31,9 +31,9 @@ We welcome everyone to take a look at our scripts and learn them. We did not add
 
 [Wurenjun (wurenjun_cn)](https://www.youtube.com/@N1-Wurenjun)
 
-intdgy (intdgy)
+[intdgy (intdgy)]((https://www.youtube.com/@Danny-b2w))
 
-parrol (justague)
+[parrol (justague)]((https://www.youtube.com/@imstupid-0511 ))
 
 # Links
 N1CN discord server: [discord.gg/zrWcRSJRJk](https://discord.com/invite/zrWcRSJRJk)
