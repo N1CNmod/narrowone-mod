@@ -31,9 +31,9 @@ We welcome everyone to take a look at our scripts and learn them. We did not add
 
 [Wurenjun (wurenjun_cn)](https://www.youtube.com/@N1-Wurenjun)
 
-[intdgy (intdgy)]((https://www.youtube.com/@Danny-b2w))
+[intdgy (intdgy)](https://www.youtube.com/@Danny-b2w)
 
-[parrol (justague)]((https://www.youtube.com/@imstupid-0511 ))
+[parrol (justague)](https://www.youtube.com/@imstupid-0511)
 
 # Links
 N1CN discord server: [discord.gg/zrWcRSJRJk](https://discord.com/invite/zrWcRSJRJk)
