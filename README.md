@@ -23,6 +23,10 @@ Health Bar Percentage Display: Display a text percentage of current HP bar state
 
 No Physics Changes: This mod does not alter any game physics, ensuring a consistent gaming experience.
 
+# No obfuscation 
+
+We welcome everyone to take a look at our scripts and learn them. We did not add any obfuscation which could effects user's understanding, being selfless and inclusive is better.
+
 # Main Contributers:
 
 Wurenjun (wurenjun_cn)
@@ -43,6 +47,8 @@ JavaScript & CSS: https://www.w3schools.com/JS/
 
 Beginner coding: [code.org](https://code.org/)
                 https://www.freecodecamp.org/
+
+Image uploading website: https://imgbb.com/                
 
 Avalible ai tool(might help): https://chat.deepseek.com/
 
