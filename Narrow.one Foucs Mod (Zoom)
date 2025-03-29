@@ -2,7 +2,7 @@
 // @name         Narrow.one Foucs Mod by CN Clan
 // @author       intdgy
 // @namespace    http://tampermonkey.net/
-// @version      3.4
+// @version      4.1
 // @description  Zoom modes (Shift & Right-click)     AND PS: A guy who called infurness in the Narrow One Community is a scum lol. The Mod wouldn't have been so good if it hadn't been for his obstructions and insults.
 // @match        *://narrow.one/*
 // @run-at       document-start
@@ -396,7 +396,7 @@
             <b>Quick Guide:</b><br>
             • Hold Shift to use green zoom<br>
             • Hold Right-Click for blue zoom<br>
-            • Press Tab to show/hide panel<br>
+            • Press P to show/hide panel<br>
             • Adjust sliders to customize zoom levels<br>
             • Values < 1.0 = wider view<br>
             • Values > 1.0 = narrower view
@@ -480,12 +480,13 @@
 
         // Keyboard and mouse event handlers
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Tab') {
+            if (e.key === 'p' || e.key === 'P') { // Changed to P (case insensitive)
                 e.preventDefault();
                 isPanelVisible = !isPanelVisible;
                 panel.classList.toggle('visible');
                 log('Control panel:', isPanelVisible ? 'shown' : 'hidden');
             }
+
             if (e.key === 'Shift' && !e.repeat) {
                 isZooming = true;
                 zoomTrigger = 'shift';
