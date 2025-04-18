@@ -1,5 +1,5 @@
 # narrowone-mod
-This is a game mod for narrow.one Custom Ui, Special Icon and more Unique features. We suggest N1CN members to use this in gameplays.
+This is a group of cool mods for narrow.one including lots of features. They are all made by N1CN members. We encourage everyone to use these mods in gameplays.
 
 # Overview
 Welcome to the N1CN Mod. This mod is designed for Narrowone (especially N1CN) players. We hope everyone can manage to get a cool mods made by us. 
