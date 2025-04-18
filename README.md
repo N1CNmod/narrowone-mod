@@ -4,7 +4,7 @@ This is a group of cool mods for narrow.one including lots of features. They are
 # Overview
 Welcome to the N1CN Mod. This mod is designed for Narrowone (especially N1CN) players. We hope everyone can manage to get a cool mods made by us. 
 
-# What the Mod Does
+# What do the mods do
 Custom User Interface: This mod provides a Custom User Interface with Chinese new year theme. (Partially borrowed from T7)
 
 Free Camera: Provides Advanced Camra Controls for players to spectate a match.
