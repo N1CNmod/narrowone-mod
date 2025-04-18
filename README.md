@@ -37,7 +37,7 @@ Step 2: Enable "Developer mode" in "Manage Extensions"
 
 <img width="1468" alt="Screenshot 2025-04-18 at 3 25 23 PM" src="https://github.com/user-attachments/assets/a9010c4d-bbf9-43bb-a0c0-fc0b522a38e8" />
 
-Step 3:Click on "Create a new script"
+Step 3:Open the Tampermonkey extension, click on "Create a new script"
 
 <img width="240" alt="Screenshot 2025-04-18 at 3 27 28 PM" src="https://github.com/user-attachments/assets/5c514b8b-8551-410b-b35f-d500963166d7" />
 
