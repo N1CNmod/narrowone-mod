@@ -1,0 +1,401 @@
+// ==UserScript==
+// @name         Rainbow Theme Narrow One Custom Ui
+// @namespace    http://tampermonkey.net/
+// @version      2025-04-18
+// @description  try to take over the world!
+// @author       parrol
+// @match        https://narrow.one/
+// @icon         https://www.google.com/url?sa=i&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FRainbow_flag&psig=AOvVaw2gum1AjGqKgEXdfd517SJB&ust=1745032144077000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCID1qr3N4IwDFQAAAAAdAAAAABAE
+// @grant        GM_addStyle
+// ==/UserScript==
+
+(function() {
+    'use strict';
+// Add CSS styles
+  GM_addStyle(`
+   .dialog {
+    filter: var(--default-drop-shadow);
+    padding: 30px;
+    box-sizing: border-box;
+    width: max-content;
+    border-radius: 30px;
+  background-image: linear-gradient(320deg, red, orange, yellow, green, blue, violet ,purple)
+}
+.dialog-button {
+    padding: 7px 30px;
+    margin: 4px 10px;
+    font-size: 24px;
+    height: 38px;
+    color: var(--default-text-color);
+    vertical-align: middle;
+    white-space: nowrap;
+    --wrinkled-paper-border-size: 3;
+    --wrinkled-paper-border-size-bottom: 6;
+    --wrinkled-paper-border-color: var(--default-wrinkled-paper-border-color);
+    --wrinkled-paper-seed: 70;
+    --wrinkled-paper-wrinkle-size: 2px;
+    --wrinkled-paper-border-segments: 0.02;
+    --wrinkled-paper-tear-count-min: 0;
+    --wrinkled-paper-tear-count-max: 0;
+      border-radius: 30px;
+     background-image: linear-gradient(320deg, #8fb0db, #8fb0db);
+}
+.itemsTable {
+    border-collapse: collapse;
+
+   background-image: linear-gradient(320deg, #8fb0db, #8fb0db);
+}
+
+input.dialog-text-input.blueNight.wrinkledPaper.join-squad-input {
+  background-image: linear-gradient(45deg, #01001c, #00171c, #00171c);
+  border-radius: 30px;
+  color: white,
+}
+.dialog-select-input {
+    color: var(--default-text-color);
+    appearance: none;
+    outline: none;
+    border: none;
+    padding: 8px 25px 8px 8px;
+    font-size: 14pt;
+    background-color: transparent;
+     background-image: linear-gradient(320deg, #8fb0db, #8fb0db);
+
+}
+.shop-skin-preview-canvas {
+    display: block;
+    background-image: linear-gradient(320deg, #8fb0db, #8fb0db);
+  color: white,
+
+}
+.main-menu-button {
+    border: none;
+    width: 70px;
+    height: 70px;
+    cursor: pointer;
+    margin: 5px;
+    padding: 0px;
+    --wrinkled-paper-border-segments: 0.04;
+    --wrinkled-paper-wrinkle-size: 5px;
+    --wrinkled-paper-border-size: 3;
+    --wrinkled-paper-border-size-bottom: 6;
+    --wrinkled-paper-border-color: var(--button-on-clear-bg-wrinkled-paper-border-color);
+    --wrinkled-paper-tear-count-min: 0;
+    --wrinkled-paper-tear-count-max: 0;
+    filter: var(--default-drop-shadow);
+    border-radius: 30px;
+    border: 1px solid transparent;
+    background-image: linear-gradient(320deg, #8fb0db, #8fb0db);
+  border-radius: 15px;
+  color: white,
+}
+
+button.main-menu-corner-profile {
+  padding: 20px;
+  background-image: linear-gradient(320deg, #eb92be, #ffef78, #63c9b4);
+  border-radius: 30px;
+  color: white,
+
+}
+
+div.avatar {
+  padding: 10px;
+  background-image:url(https://cdn.discordapp.com/attachments/1345596253546741790/1352285111730573453/download_1.jpg?ex=67e75866&is=67e606e6&hm=77ac9e3cf6f8b0a8aca6010504bf11adc29cb88eb36d9019aa2d4843218b6255&);
+  border-radius: 30%;
+
+}
+.menu-buttons-container {
+    max-width: fit-content;
+    overflow-y: auto;
+    max-height: 100%;
+   background-image: linear-gradient(320deg, #eb92be, #ffef78, #63c9b4);
+     border-radius: 30px;
+     transform: translateX(5%)
+}
+.ownedCoinsContainer {
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    padding: 10px;
+    filter: var(--default-drop-shadow);
+    border-radius: 30px;
+    background-image: linear-gradient(320deg, #eb92be, #ffef78, #63c9b4);
+}
+.shopItem {
+  border-radius: 30px;
+  background-image: linear-gradient(320deg, #8fb0db, #8fb0db);
+}
+
+.class-selection-image-background {
+    position: absolute;
+    inset: 0px;
+    border-radius: 30px;
+
+}
+
+div.class-selection-image {
+  background-color: #8fb0db;
+  border-radius: 30px;
+}
+input.dialog-range-input[type="range"], input.dialog-range-input[type="range"]::-webkit-slider-thumb {
+    --wrinkled-paper-wrinkle-size: 6px;
+    --wrinkled-paper-color: #8fb0db;
+    --wrinkled-paper-border-segments: 0.0016;
+    --wrinkled-paper-tear-count-min: 0.001;
+    --wrinkled-paper-tear-count-max: 0.003;
+    --wrinkled-paper-tear-depth-min: 5px;
+    --wrinkled-paper-tear-depth-max: 15px;
+    --wrinkled-paper-tear-width-min: 10px;
+    --wrinkled-paper-tear-width-max: 20px;
+    --wrinkled-paper-tear-angle-offset-min: 0.7;
+    --wrinkled-paper-tear-angle-offset-max: 1.1;
+}
+.chat-container {
+    position: absolute;
+    left: 20px;
+    bottom: 20px;
+    filter: var(--default-drop-shadow);
+    padding: 20px;
+    transition: transform 0.3s;
+    z-index: 1;
+    background: transparent;
+}
+.dialog-text-input {
+    padding: 7px;
+    margin: 4px 10px;
+    font-size: 24px;
+    height: 38px;
+    border: none;
+    box-sizing: border-box;
+    color: var(--default-text-color);
+    background: transparent;
+}
+.blueNight {
+    text-transform: lowercase;
+    font-weight: lighter;
+    line-height: 0.7em;
+    -webkit-text-stroke: 0px black;
+      font-weight: bold;
+}
+.whiteBigText a {
+    color: white;
+    -webkit-text-stroke: 0px black;
+    font-weight: bold;
+}
+.health-ui-container {
+  padding: 13px;
+  border-radius: 30px;
+  transform: scale(1.0);
+  background-image: linear-gradient(320deg, #eb92be, #ffef78, #63c9b4);
+}
+.health-ui-heart {
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    left: -300px;
+    top: -5px;
+}
+.chat-container {
+    position: absolute !important;
+    left: 20px !important;
+    bottom: 20px !important;
+    filter: var(--default-drop-shadow) !important;
+    padding: 15px !important;
+    transition: transform 0.3s !important;
+    z-index: 1 !important;
+   background-image: linear-gradient(320deg, #eb92be, #ffef78, #63c9b4) !important;
+    border-radius: 30px !important;
+}
+.shop-skin-selection-list {
+    display: flex
+;
+    overflow-x: scroll;
+    max-width: 1325px;
+    scroll-behavior: smooth;
+}
+dialog-button blueNight wrinkledPaper {
+  transform: translateX(30px);
+}
+.whiteBigText {
+  color: white;
+ -webkit-text-stroke: 0px black;
+    }
+    .dialog {
+    filter: var(--default-drop-shadow);
+    padding: 30px;
+    box-sizing: border-box;
+    width: max-content;
+    border-radius: 30px;
+   background-image: linear-gradient(320deg, #eb92be, #ffef78, #63c9b4);
+}
+.join-squad-input {
+   background-image: linear-gradient(320deg, #8fb0db, #8fb0db);
+}
+input.dialog-text-input.blueNight.wrinkledPaper.join-squad-input {
+   background-image: linear-gradient(320deg, #8fb0db, #8fb0db);
+}
+.dialog-button {
+  background-image: linear-gradient(320deg, #eb92be, #ffef78, #63c9b4);
+}
+.coin-count-text {
+    color: white;
+    font-weight: bold;
+    position: relative;
+    letter-spacing: 1px;
+    font-size: 20pt;
+}
+.coin-icon {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    background-image: url(https://cdn.discordapp.com/attachments/1345596253546741790/1345596278339272735/z6366016999887_944bd7104151f23fe758cc41b71c9f52_1_20x20.jpg?ex=67f1f2b0&is=67f0a130&hm=8e240e41a4683571aec5e5d891e2d2bd2ab6b2ec193088222ce92f6dc1bb9714&);
+    margin-right: 5px;
+    border-radius: 30px;
+}
+.settings-group-header {
+  background: transparent;
+  backdrop-filter: blur(50px);
+}
+.playersListTeam.wrinkledPaper{ /*Players Scoreboard (rows background and text)*/
+  background: none !important;
+}
+.playersListContainer thead{ /* Scoreboard: Table Head */
+  opacity: 75% !important;
+  clip-path: polygon(0 50%, 10% 0, 98% 10%, 100% 90%, 90% 100%, 15% 100%, 0 50%) !important;
+}
+.chat-container {
+  transform: translateX(135px);
+}
+.chat-log-container {
+  color: white;
+  font-weight: bold;
+}
+
+.flag-score-container, .elimination-score-container {
+  padding: 20px;
+   background-image: linear-gradient(320deg, #eb92be, #ffef78, #63c9b4);
+   border-radius: 30px;
+}
+.map-item-thumb {
+  border-radius: 30px;
+}
+.corner-stats-container {
+  padding: 25px;
+  transform: translate(1300px, -15px);
+   background-image: linear-gradient(320deg, #eb92be, #ffef78, #63c9b4);
+   border-radius: 30px;
+}
+.dialog-checkbox-input, .dialog-toggle-input {
+   background-image: linear-gradient(320deg, #8fb0db, #8fb0db);
+}
+.dialog {
+    filter: var(--default-drop-shadow);
+    padding: 30px;
+    box-sizing: border-box;
+    width: max-content;
+    border-radius: 30px;
+     background-image: linear-gradient(320deg, #eb92be, #ffef78, #63c9b4);
+}
+.flag-score-item:nth-of-type(2) .flag-score-point-el.returned .center-dot:nth-of-type(3) {
+  --team-color: cyan;
+  fill: var(--team-color);
+  stroke: var(--team-color);
+}
+.flag-score-item:nth-of-type(1) .flag-score-point-el.returned .center-dot:nth-of-type(3) {
+  --team-color: #ff00f7;
+  fill: var(--team-color);
+  stroke: var(--team-color);
+}
+
+.dialog {
+    filter: var(--default-drop-shadow);
+    padding: 30px;
+    box-sizing: border-box;
+    width: max-content;
+    border-radius: 30px;
+     background-image: linear-gradient(320deg, #eb92be, #ffef78, #63c9b4);
+
+}
+.profile-stat {
+  background-image: linear-gradient(320deg, #8fb0db, #8fb0db);
+  border-radius: 30px;
+}
+.linked-accounts > div {
+   background-image: linear-gradient(320deg, #8fb0db, #8fb0db);
+   border-radius: 30px;
+}
+.chat-container {
+  transform: translateX(1px);
+
+
+}
+
+
+.main-menu-corner-profileprofile:hover {
+  filter: brightness(0.6);
+}
+
+    .class-selection-image-container {
+    position: relative;
+    min-width: 200px;
+    background: transparent;
+    min-height: 200px;
+}
+.weaponSelectionDialog {
+  transform: scale(0.5) translateX(-1300px);
+}
+.class-selection-image-container.in-game > .class-selection-image-background {
+    --wrinkled-paper-banner-size: 20px;
+    --wrinkled-paper-border-size: 12px;
+  background: transparent;
+}
+.class-selection-image-container.in-game > .class-selection-image {
+    background-size: 130%;
+    background-position: 50% 10%;
+    transform: scale(0.8);
+}
+.squad-players-list {
+  border-radius: 30px;
+}
+ .dialog-select-wrapper, .dialog-checkbox-input, .dialog-toggle-input, input.dialog-range-input[type="range"], .dialog-color-input {
+   --wrinkled-paper-seed: 10101001;
+  border-radius: 15px;
+  background: transparent;
+  backdrop-filter: blur(15px);
+  border: 5px #8fb0db solid;
+}
+input.dialog-range-input[type="range"], input.dialog-range-input[type="range"]::-webkit-slider-thumb, .dialog-checkbox-input{
+  background: transparent;
+  border: 5px solid #8fb0db;
+}
+.dialog-checkbox-input:checked::before {
+  filter: #8fb0db;
+}
+input::placeholder{
+  color: white;
+  font-size: 20px;
+}
+.chat-container {
+  background: transparent
+}
+input.dialog-range-input[type="range"], input.dialog-range-input[type="range"]::-webkit-slider-thumb, .dialog-checkbox-input{
+  background: transparent;
+  border: 5px solid #8fb0db;
+}
+.dialog-select-wrapper, .dialog-checkbox-input, input.dialog-range-input[type="range"], .dialog-color-input {
+   --wrinkled-paper-seed: 10101001;
+  border-radius: 15px;
+  background: transparent;
+  backdrop-filter: blur(15px);
+}
+.flag-score-container, .elimination-score-container {
+    padding: 50px !important;
+    transform: scale(15px);
+    }
+   .elimination-score-container {
+      padding: 50px;
+   }
+
+    `);
+
+    })();
