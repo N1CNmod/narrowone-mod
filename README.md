@@ -25,7 +25,7 @@ No Physics Changes: This mod does not alter any game physics, ensuring a consist
 
 # No obfuscation 
 
-We welcome everyone to take a look at our scripts and learn them. We did not add any obfuscation which could effects user's understanding. We believe that being selfless and inclusive would be better.
+We welcome everyone to take a look at our scripts and learn them. We did not add any obfuscation which could effects user's understanding. We believe that being selfless and inclusive could be better.
 
 # How to run the scripts (step-by-step guide)
 
@@ -74,7 +74,7 @@ N1CN discord server: [discord.gg/zrWcRSJRJk](https://discord.com/invite/zrWcRSJR
 
 N1CN itch: https://n1cn.itch.io/
 
-Intro to N1CN: https://n1cn.mystrikingly.com/
+N1CN official website: https://n1cn.mystrikingly.com/
 
 # Study Resources(For coders)
 JavaScript & CSS: https://www.w3schools.com/JS/
@@ -89,6 +89,10 @@ Avalible ai tool(might help): https://chat.deepseek.com/
 For deobfuscators: https://deobfuscate.io/ 
 
 For obfuscators: https://obfuscator.io/
+
+*To get the names of the elements in Narrow One, you can right-click on something and press 'Inspect"
+
+<img width="485" alt="Screenshot 2025-04-18 at 6 05 33 PM" src="https://github.com/user-attachments/assets/40390665-2b88-4bdf-837b-b726036a6ca0" />
 
 
 # Reminder:
