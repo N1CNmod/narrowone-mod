@@ -27,9 +27,9 @@ No Physics Changes: This mod does not alter any game physics, ensuring a consist
 
 We welcome everyone to take a look at our scripts and learn them. We did not add any obfuscation which could effects user's understanding. We believe that being selfless and inclusive would be better.
 
-# How to run the scripts (step by step guide)
+# How to run the scripts (step-by-step guide)
 
-Step 1:install the browser extension-"Tempermonkey", it is avalible for chrome, edge and opera, etc.
+Step 1:Install the browser extension-"Tempermonkey", it is avalible for chrome, edge and opera, etc.
 
 <img width="1430" alt="Screenshot 2025-04-18 at 3 22 41 PM" src="https://github.com/user-attachments/assets/4f1171f6-1ca6-406c-93ce-f0de29260713" />
 
@@ -48,15 +48,18 @@ Step 4:Drag and delete the default code
 Step 5:Copy&Paste the code in GitHub to tampermonkey
 
 <img width="854" alt="Screenshot 2025-04-18 at 5 43 09 PM" src="https://github.com/user-attachments/assets/f5dfbba5-dd6d-4218-9efb-54ac13b4ba5b" />
-<img width="1468" alt="Screenshot 2025-04-18 at 3 25 23 PM" src="https://github.com/user-attachments/assets/341e5847-5d9d-43dc-964a-77f1b92fa97a" />
+<img width="1440" alt="Screenshot 2025-04-18 at 5 44 13 PM" src="https://github.com/user-attachments/assets/4680c9de-82be-4134-a591-9b0f54b6d450" />
 
 Step 6:Safe the code
 
 <img width="533" alt="Screenshot 2025-04-18 at 5 45 32 PM" src="https://github.com/user-attachments/assets/0d9a2efb-f8fb-4be1-b325-87c5e067a204" />
 
+
 Step 7:Reload the website
 
-Open [Narrow One]((https://narrow.one/)) and reload the web page.
+Open [Narrow One](https://narrow.one/) and reload the web page.
+
+<img width="622" alt="Screenshot 2025-04-18 at 6 00 39 PM" src="https://github.com/user-attachments/assets/7fe755d5-99c1-4618-b448-f603ad7263be" />
 
 # Main Contributers:
 
