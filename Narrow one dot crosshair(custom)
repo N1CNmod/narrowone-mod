@@ -1,0 +1,95 @@
+// ==UserScript==
+// @name         Narrow one dot crosshair(custom)
+// @namespace    http://tampermonkey.net/
+// @version      2
+// @description  Adds a cool little dot crosshair to the center of the screen, able to change colors.
+// @author       Wurenjun
+// @match        https://narrow.one/
+// @grant        none
+// @icon         https://industrialfloortape.com/cdn/shop/products/34dotblk.jpeg?v=1402348048
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // Create the dot
+    const dot = document.createElement('div');
+    dot.style.position = 'fixed';
+    dot.style.top = '50%';
+    dot.style.left = '50%';
+    dot.style.transform = 'translate(-50%, -50%)';
+    dot.style.width = '8px';
+    dot.style.height = '8px';
+    dot.style.borderRadius = '50%';
+    dot.style.backgroundColor = 'white';
+    dot.style.border = '1px solid black';
+    dot.style.pointerEvents = 'none';
+    dot.style.zIndex = '9999';
+
+    // Create controls container
+    const controls = document.createElement('div');
+    controls.style.position = 'fixed';
+    controls.style.bottom = '20px';
+    controls.style.left = '20px';
+    controls.style.backgroundColor = 'rgba(15, 15, 15, 0.4)';
+    controls.style.padding = '10px';
+    controls.style.borderRadius = '5px';
+    controls.style.zIndex = '9999';
+    controls.id = 'dot-controls'; // Add ID for easier reference
+
+    // Create background color picker
+    const bgColorLabel = document.createElement('label');
+    bgColorLabel.textContent = 'Dot Color: ';
+    bgColorLabel.style.marginRight = '10px';
+
+    const bgColorPicker = document.createElement('input');
+    bgColorPicker.type = 'color';
+    bgColorPicker.value = '#ffffff';
+    bgColorPicker.addEventListener('input', () => {
+        dot.style.backgroundColor = bgColorPicker.value;
+    });
+
+    // Create border color picker
+    const borderColorLabel = document.createElement('label');
+    borderColorLabel.textContent = 'Border Color: ';
+    borderColorLabel.style.marginRight = '10px';
+    borderColorLabel.style.marginLeft = '10px';
+
+    const borderColorPicker = document.createElement('input');
+    borderColorPicker.type = 'color';
+    borderColorPicker.value = '#000000';
+    borderColorPicker.addEventListener('input', () => {
+        dot.style.borderColor = borderColorPicker.value;
+    });
+
+    // Append elements
+    bgColorLabel.appendChild(bgColorPicker);
+    borderColorLabel.appendChild(borderColorPicker);
+    controls.appendChild(bgColorLabel);
+    controls.appendChild(borderColorLabel);
+    document.body.appendChild(dot);
+    document.body.appendChild(controls);
+
+    // Add keyboard event listener
+    document.addEventListener('keydown', (e) => {
+        if (e.key.toLowerCase() === 'e') {
+            controls.style.display = controls.style.display === 'none' ? 'block' : 'none';
+        }
+    });
+
+    // Add close button for better UX
+    const closeButton = document.createElement('button');
+    closeButton.textContent = '×';
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '5px';
+    closeButton.style.color = 'white';
+    closeButton.style.right = '5px';
+    closeButton.style.background = 'none';
+    closeButton.style.border = 'none';
+    closeButton.style.fontSize = '16px';
+    closeButton.style.cursor = 'pointer';
+    closeButton.addEventListener('click', () => {
+        controls.style.display = 'none';
+    });
+    controls.appendChild(closeButton);
+})();
