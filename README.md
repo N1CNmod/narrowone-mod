@@ -69,6 +69,9 @@ Open [Narrow One](https://narrow.one/) and reload the web page.
 
 [parrol (justague)](https://www.youtube.com/@imstupid-0511)
 
+CNN (cnn45000)
+
+
 # Links
 N1CN discord server: [discord.gg/zrWcRSJRJk](https://discord.com/invite/zrWcRSJRJk)
 
