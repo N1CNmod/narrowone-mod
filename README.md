@@ -61,7 +61,7 @@ Open [Narrow One](https://narrow.one/) and reload the web page.
 
 <img width="622" alt="Screenshot 2025-04-18 at 6 00 39 PM" src="https://github.com/user-attachments/assets/7fe755d5-99c1-4618-b448-f603ad7263be" />
 
-# Main Contributers:
+# Contributers:
 
 [Wurenjun (wurenjun_cn)](https://www.youtube.com/@N1-Wurenjun)
 
