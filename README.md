@@ -69,6 +69,8 @@ Open [Narrow One](https://narrow.one/) and reload the web page.
 
 [parrol (justague)](https://www.youtube.com/@imstupid-0511)
 
+[Duck (duck26122009)]((https://github.com/Duckynolucky))
+
 CNN (cnn45000)
 
 
