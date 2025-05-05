@@ -79,6 +79,8 @@ N1CN itch: https://n1cn.itch.io/
 
 N1CN official website: https://n1cn.mystrikingly.com/
 
+Other CN members' page: https://github.com/Duckynolucky & https://github.com/parrol-CN
+
 # Study Resources(For coders)
 JavaScript & CSS: https://www.w3schools.com/JS/
 
