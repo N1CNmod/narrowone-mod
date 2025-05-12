@@ -1,0 +1,94 @@
+// ==UserScript==
+// @name         Narrow.One 1v1 Match card - classical
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  Show a 1v1 styled match card with player names and kills
+// @author       CNN
+// @match        *://*.narrow.one/*
+// @grant        none
+// ==/UserScript==
+
+(function () {
+    'use strict';
+
+    function makeUI() {
+        const box = document.createElement('div');
+        box.id = 'hud1v1';
+        box.innerHTML = `
+          <div class="pname" id="you1v1">You: ?</div>
+          <div class="vsbit">VS</div>
+          <div class="pname" id="foe1v1">Enemy: ?</div>
+        `;
+        document.body.appendChild(box);
+
+        const css = document.createElement('style');
+        css.innerHTML = `
+          #hud1v1 {
+            position: fixed;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(10,10,10,0.75);
+            color: #eee;
+            font-family: sans-serif;
+            font-size: 17px;
+            padding: 8px 20px;
+            border-radius: 10px;
+            display: none;
+            align-items: center;
+            gap: 25px;
+            z-index: 9999;
+            box-shadow: 0 0 8px #000;
+          }
+          .pname {
+            font-weight: 600;
+            min-width: 130px;
+            text-align: center;
+          }
+          .vsbit {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffc400;
+          }
+        `;
+        document.head.appendChild(css);
+    }
+
+    function getInfo() {
+        const tables = document.querySelectorAll('.playersListTeamTable tbody');
+        let me = null, other = null;
+
+        tables.forEach(t => {
+            t.querySelectorAll('.playersListItem').forEach(row => {
+                const name = row.querySelector('.player-list-username')?.textContent.trim();
+                const kills = parseInt(row.querySelectorAll('.playersListItemScore')[1]?.textContent || "0");
+                const label = row.querySelector('.players-list-label');
+                if (label?.textContent.includes('You')) me = { name, kills };
+                else if (name) other ??= { name, kills };
+            });
+        });
+
+        return me && other ? { me, other } : null;
+    }
+
+    function showData() {
+        const d = getInfo();
+        const box = document.getElementById('hud1v1');
+        if (!box) return;
+
+        if (d) {
+            document.getElementById('you1v1').textContent = `${d.me.name}: ${d.me.kills} Kills`;
+            document.getElementById('foe1v1').textContent = `${d.other.name}: ${d.other.kills} Kills`;
+            box.style.display = 'flex';
+        } else {
+            box.style.display = 'none';
+        }
+    }
+
+    function start() {
+        makeUI();
+        setInterval(showData, 1000);
+    }
+
+    window.addEventListener('load', () => setTimeout(start, 2000));
+})();
