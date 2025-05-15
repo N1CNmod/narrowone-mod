@@ -1,0 +1,170 @@
+// ==UserScript==
+// @name         Small WASD keyboard + Mouse
+// @namespace    http://tampermonkey.net/
+// @version      1.4
+// @description  Show WASD and mouse (enable to draggable)
+// @author       parrol & CNN
+// @match        https://narrow.one/
+// @grant        none
+// ==/UserScript==
+
+(function () {
+    'use strict';
+
+    const overlay = document.createElement("div");
+    overlay.style.position = "fixed";
+    overlay.style.bottom = "50px";
+    overlay.style.left = "1200px";
+    overlay.style.display = "flex";
+    overlay.style.gap = "20px";
+    overlay.style.zIndex = "9999";
+    document.body.appendChild(overlay);
+
+    // Mouse
+    const mouse = document.createElement("div");
+    mouse.style.width = "120px";
+    mouse.style.height = "200px";
+    mouse.style.border = "1px solid white";
+    mouse.style.borderRadius = "10px";
+    mouse.style.position = "relative";
+    mouse.style.display = "flex";
+    mouse.style.flexDirection = "column";
+    mouse.style.overflow = "hidden";
+    mouse.style.background = "transparent";
+    mouse.style.backdropFilter = "blur(15px)";
+
+    const mouseTop = document.createElement("div");
+    mouseTop.style.height = "50%";
+    mouseTop.style.display = "flex";
+
+    const leftHalf = document.createElement("div");
+    leftHalf.style.flex = "1";
+    leftHalf.style.borderRight = "1px solid white";
+    leftHalf.style.background = "transparent";
+    leftHalf.style.backdropFilter = "blur(15px)";
+
+    const rightHalf = document.createElement("div");
+    rightHalf.style.flex = "1";
+    rightHalf.style.borderLeft = "1px solid white";
+    rightHalf.style.background = "transparent";
+    rightHalf.style.backdropFilter = "blur(15px)";
+
+    mouseTop.appendChild(leftHalf);
+    mouseTop.appendChild(rightHalf);
+    mouse.appendChild(mouseTop);
+
+    const mouseBottom = document.createElement("div");
+    mouseBottom.style.height = "50%";
+    mouseBottom.style.background = "transparent";
+    mouseBottom.style.backdropFilter = "blur(15px)";
+    mouse.appendChild(mouseBottom);
+
+    overlay.appendChild(mouse);
+
+    const keyContainer = document.createElement("div");
+    keyContainer.style.display = "grid";
+    keyContainer.style.gridTemplateColumns = "50px 50px 50px";
+    keyContainer.style.gridTemplateRows = "50px 50px 50px";
+    keyContainer.style.gap = "10px";
+    keyContainer.style.textAlign = "center";
+    keyContainer.style.backdropFilter = "blur(15px)";
+    keyContainer.style.padding = "10px";
+    keyContainer.style.borderRadius = "15px";
+    keyContainer.style.border = "1px solid white";
+    overlay.appendChild(keyContainer);
+
+    // Make draggable
+    let isDragging = false, offsetX, offsetY;
+    overlay.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        offsetX = e.clientX - overlay.getBoundingClientRect().left;
+        offsetY = e.clientY - overlay.getBoundingClientRect().top;
+        overlay.style.cursor = 'grabbing';
+        overlay.style.userSelect = 'none';
+    });
+
+    document.addEventListener('mouseup', () => {
+        isDragging = false;
+        overlay.style.cursor = 'grab';
+        overlay.style.userSelect = '';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+            e.preventDefault();
+            overlay.style.left = `${e.clientX - offsetX}px`;
+            overlay.style.top = `${e.clientY - offsetY}px`;
+            overlay.style.bottom = "unset"; // disable bottom anchor
+        }
+    });
+
+    // Key
+    const keyElements = {};
+    const keyPositions = {
+        "Q": [1, 1], "W": [1, 2],
+        "A": [2, 1], "S": [2, 2], "D": [2, 3],
+        "Space": [3, 1, 3]
+    };
+
+    Object.keys(keyPositions).forEach(key => {
+        const keyDiv = document.createElement("div");
+        keyDiv.innerHTML = key === "Space" ? "SPACE" : key;
+        keyDiv.style.padding = "15px";
+        keyDiv.style.textAlign = "center";
+        keyDiv.style.fontSize = "20px";
+        keyDiv.style.background = "transparent";
+        keyDiv.style.color = "white";
+        keyDiv.style.backdropFilter = "blur(15px)";
+        keyDiv.style.userSelect = "none";
+        keyDiv.style.borderRadius = "15px";
+        keyDiv.style.border = "1px solid white";
+        keyDiv.style.gridColumn = keyPositions[key][1] + (key === "Space" ? " / span " + keyPositions[key][2] : "");
+        keyDiv.style.gridRow = keyPositions[key][0];
+        keyContainer.appendChild(keyDiv);
+        keyElements[key] = keyDiv;
+    });
+
+    document.addEventListener("keydown", function (event) {
+        const key = event.code.replace("Key", "");
+        if (keyElements[key]) {
+            keyElements[key].style.background = "white";
+            keyElements[key].style.color = "black";
+        }
+        if (event.code === "Space" && keyElements["Space"]) {
+            keyElements["Space"].style.background = "white";
+            keyElements["Space"].style.color = "black";
+        }
+    });
+
+    document.addEventListener("keyup", function (event) {
+        const key = event.code.replace("Key", "");
+        if (keyElements[key]) {
+            keyElements[key].style.background = "transparent";
+            keyElements[key].style.color = "white";
+        }
+        if (event.code === "Space" && keyElements["Space"]) {
+            keyElements["Space"].style.background = "transparent";
+            keyElements["Space"].style.color = "white";
+        }
+    });
+
+    document.addEventListener("mousedown", function (event) {
+        if (event.button === 0) {
+            leftHalf.style.background = "white";
+        } else if (event.button === 2) {
+            rightHalf.style.background = "white";
+        }
+    });
+
+    document.addEventListener("mouseup", function (event) {
+        if (event.button === 0) {
+            leftHalf.style.background = "transparent";
+        } else if (event.button === 2) {
+            rightHalf.style.background = "transparent";
+        }
+    });
+
+    document.addEventListener("contextmenu", function (e) {
+        e.preventDefault();
+    });
+})();
