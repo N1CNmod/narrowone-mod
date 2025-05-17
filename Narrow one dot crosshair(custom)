@@ -18,8 +18,8 @@
     dot.style.top = '50%';
     dot.style.left = '50%';
     dot.style.transform = 'translate(-50%, -50%)';
-    dot.style.width = '8px';
-    dot.style.height = '8px';
+    dot.style.width = '6px';
+    dot.style.height = '6px';
     dot.style.borderRadius = '50%';
     dot.style.backgroundColor = 'white';
     dot.style.border = '1px solid black';
