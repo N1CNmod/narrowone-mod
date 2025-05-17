@@ -141,10 +141,12 @@
         if (keyElements[key]) {
             keyElements[key].style.background = "transparent";
             keyElements[key].style.color = "white";
+            keyElements[key].style.transition = "background 0.2s ease-in-out, color 0.2s ease-in-out";
         }
         if (event.code === "Space" && keyElements["Space"]) {
             keyElements["Space"].style.background = "transparent";
             keyElements["Space"].style.color = "white";
+            keyElements["Space"].style.transition = "background 0.2s ease-in-out, color 0.2s ease-in-out";
         }
     });
 
@@ -159,8 +161,10 @@
     document.addEventListener("mouseup", function (event) {
         if (event.button === 0) {
             leftHalf.style.background = "transparent";
+            leftHalf.style.transition = "background 0.2s ease-in-out";
         } else if (event.button === 2) {
             rightHalf.style.background = "transparent";
+            rightHalf.style.transition = "background 0.2s ease-in-out";
         }
     });
 
