@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Narrow.One 1v1 Match card - classical
+// @name         Narrow.One 1v1 Match Card + Triggered Intro Banner
 // @namespace    http://tampermonkey.net/
-// @version      1.0
-// @description  Show a 1v1 styled match card with player names and kills
+// @version      1.4
+// @description  Shows 1v1 styled match card with manual intro banner trigger (press +), names, avatars, and animated kill updates for recordings
 // @author       CNN
 // @match        *://*.narrow.one/*
 // @grant        none
@@ -11,47 +11,287 @@
 (function () {
     'use strict';
 
+    let lastKills = { me: 0, other: 0 };
+
     function makeUI() {
         const box = document.createElement('div');
         box.id = 'hud1v1';
         box.innerHTML = `
-          <div class="pname" id="you1v1">You: ?</div>
+          <div class="playerCard" id="player-me">
+            <img class="avatar" id="avatar-me" src="" />
+            <div class="playerInfo">
+              <div class="kills" id="kills-me">0</div>
+              <div class="pname" id="name-me">You</div>
+            </div>
+          </div>
           <div class="vsbit">VS</div>
-          <div class="pname" id="foe1v1">Enemy: ?</div>
+          <div class="playerCard" id="player-other">
+            <img class="avatar" id="avatar-other" src="" />
+            <div class="playerInfo">
+              <div class="kills" id="kills-other">0</div>
+              <div class="pname" id="name-other">Enemy</div>
+            </div>
+          </div>
         `;
         document.body.appendChild(box);
 
         const css = document.createElement('style');
         css.innerHTML = `
+          @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@600;800&display=swap');
+
           #hud1v1 {
             position: fixed;
-            top: 12px;
+            top: 14px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(10,10,10,0.75);
+            background: rgba(10,10,10,0.8);
             color: #eee;
             font-family: sans-serif;
             font-size: 17px;
-            padding: 8px 20px;
-            border-radius: 10px;
+            padding: 10px 24px;
+            border-radius: 12px;
             display: none;
             align-items: center;
             gap: 25px;
             z-index: 9999;
-            box-shadow: 0 0 8px #000;
+            box-shadow: 0 0 10px #000;
           }
+
+          .playerCard {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+          }
+
+          .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            background-color: #444;
+            object-fit: cover;
+          }
+
+          .playerInfo {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+          }
+
           .pname {
             font-weight: 600;
-            min-width: 130px;
-            text-align: center;
+            font-size: 14px;
           }
+
+          .kills {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            transition: transform 0.2s ease, color 0.2s ease;
+          }
+
+          .kills.updated {
+            transform: scale(1.3);
+            color: #ffcc00;
+          }
+
           .vsbit {
             font-size: 20px;
             font-weight: bold;
             color: #ffc400;
           }
+
+          #showIntroBtn {
+            position: absolute;
+            top: -18px;
+            right: -18px;
+            width: 26px;
+            height: 26px;
+            background: #222;
+            color: #fff;
+            border-radius: 50%;
+            font-size: 18px;
+            line-height: 26px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 0 8px #000;
+          }
+
+          /* ENHANCED INTRO BANNER DESIGN */
+          #introBanner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            width: 80%;
+            max-width: 900px;
+            text-align: center;
+            color: #fff;
+            z-index: 99999;
+            opacity: 0;
+            animation: fadeSlideIn 0.8s ease forwards;
+            font-family: 'Montserrat', sans-serif;
+            cursor: pointer;
+            perspective: 1000px;
+          }
+
+          .introContainer {
+            background: linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(20,20,20,0.95) 100%);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.3);
+            border: 2px solid rgba(255, 215, 0, 0.2);
+            transform-style: preserve-3d;
+            position: relative;
+            overflow: hidden;
+          }
+
+          .introContainer::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, rgba(255,215,0,0) 70%);
+            animation: rotateGlow 20s linear infinite;
+            z-index: -1;
+          }
+
+          .introTitle {
+            font-size: 5rem;
+            font-weight: 800;
+            color: #ffdf00;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.7);
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+            position: relative;
+            display: inline-block;
+          }
+
+          .introTitle::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #ffdf00, transparent);
+          }
+
+          .playersContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin: 30px 0;
+          }
+
+          .playerBox {
+            flex: 1;
+            max-width: 300px;
+            background: rgba(30, 30, 30, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+          }
+
+          .playerBox:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(255, 215, 0, 0.2);
+          }
+
+          .playerAvatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid #ffdf00;
+            margin: 0 auto 15px;
+            object-fit: cover;
+            background: #333;
+          }
+
+          .playerName {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+          }
+
+          .playerTag {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-bottom: 15px;
+          }
+
+          .vsBox {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #ffdf00;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+            padding: 0 20px;
+          }
+
+          .matchInfo {
+            font-size: 1.2rem;
+            color: #ccc;
+            margin-top: 20px;
+            letter-spacing: 1px;
+          }
+
+          @keyframes fadeSlideIn {
+            0% {
+              opacity: 0;
+              transform: translate(-50%, -60%) scale(1.2);
+            }
+            100% {
+              opacity: 1;
+              transform: translate(-50%, -50%) scale(1);
+            }
+          }
+
+          @keyframes fadeOut {
+            to {
+              opacity: 0;
+              transform: translate(-50%, -45%) scale(0.9);
+            }
+          }
+
+          @keyframes rotateGlow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+
+          @keyframes pulse {
+            0% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.7); }
+            50% { text-shadow: 0 0 20px rgba(255, 215, 0, 0.9); }
+            100% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.7); }
+          }
         `;
         document.head.appendChild(css);
+
+        // Drag support
+        let isDragging = false, offsetX, offsetY;
+        box.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            offsetX = e.clientX - box.getBoundingClientRect().left;
+            offsetY = e.clientY - box.getBoundingClientRect().top;
+            box.style.cursor = 'grabbing';
+        });
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            box.style.cursor = 'grab';
+        });
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                box.style.left = `${e.clientX - offsetX}px`;
+                box.style.top = `${e.clientY - offsetY}px`;
+            }
+        });
     }
 
     function getInfo() {
@@ -63,12 +303,67 @@
                 const name = row.querySelector('.player-list-username')?.textContent.trim();
                 const kills = parseInt(row.querySelectorAll('.playersListItemScore')[1]?.textContent || "0");
                 const label = row.querySelector('.players-list-label');
-                if (label?.textContent.includes('You')) me = { name, kills };
-                else if (name) other ??= { name, kills };
+                const avatarUrl = row.querySelector('.player-avatar')?.style?.backgroundImage?.match(/url\("?(.+?)"?\)/)?.[1] || "";
+
+                const player = { name, kills, avatarUrl };
+
+                if (label?.textContent.includes('You')) me = player;
+                else if (name && !other) other = player;
             });
         });
 
         return me && other ? { me, other } : null;
+    }
+
+    function updateKillsUI(id, newKills, lastRef) {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        if (newKills !== lastRef.value) {
+            el.textContent = `${newKills}`;
+            el.classList.add('updated');
+            setTimeout(() => el.classList.remove('updated'), 200);
+            lastRef.value = newKills;
+        }
+    }
+
+    function showIntroBanner(name1, name2, avatar1, avatar2) {
+        document.getElementById('introBanner')?.remove();
+
+        const banner = document.createElement('div');
+        banner.id = 'introBanner';
+        banner.innerHTML = `
+          <div class="introContainer">
+            <div class="introTitle">1V1</div>
+
+            <div class="playersContainer">
+              <div class="playerBox">
+                <img class="playerAvatar" src="${avatar1}" onerror="this.src='https://via.placeholder.com/80'"/>
+                <div class="playerName">${name1}</div>
+                <div class="playerTag">CHALLENGER</div>
+              </div>
+
+              <div class="vsBox">VS</div>
+
+              <div class="playerBox">
+                <img class="playerAvatar" src="${avatar2}" onerror="this.src='https://via.placeholder.com/80'"/>
+                <div class="playerName">${name2}</div>
+                <div class="playerTag">OPPONENT</div>
+              </div>
+            </div>
+
+            <div class="matchInfo">10 POINTS • CAN USE ANY BOW</div>
+          </div>
+        `;
+        document.body.appendChild(banner);
+
+        const hideBanner = () => {
+            banner.style.animation = 'fadeOut 0.5s ease forwards';
+            setTimeout(() => banner.remove(), 500);
+        };
+
+        banner.addEventListener('click', hideBanner);
+        setTimeout(hideBanner, 10000);
     }
 
     function showData() {
@@ -77,8 +372,18 @@
         if (!box) return;
 
         if (d) {
-            document.getElementById('you1v1').textContent = `${d.me.name}: ${d.me.kills} Kills`;
-            document.getElementById('foe1v1').textContent = `${d.other.name}: ${d.other.kills} Kills`;
+            document.getElementById('name-me').textContent = d.me.name;
+            document.getElementById('name-other').textContent = d.other.name;
+
+            updateKillsUI('kills-me', d.me.kills, { value: lastKills.me });
+            updateKillsUI('kills-other', d.other.kills, { value: lastKills.other });
+
+            lastKills.me = d.me.kills;
+            lastKills.other = d.other.kills;
+
+            document.getElementById('avatar-me').src = d.me.avatarUrl || '';
+            document.getElementById('avatar-other').src = d.other.avatarUrl || '';
+
             box.style.display = 'flex';
         } else {
             box.style.display = 'none';
@@ -88,6 +393,14 @@
     function start() {
         makeUI();
         setInterval(showData, 1000);
+
+        // '+' key to trigger intro banner
+        document.addEventListener('keydown', (e) => {
+            if (e.key === '+') {
+                const d = getInfo();
+                if (d) showIntroBanner(d.me.name, d.other.name, d.me.avatarUrl, d.other.avatarUrl);
+            }
+        });
     }
 
     window.addEventListener('load', () => setTimeout(start, 2000));
