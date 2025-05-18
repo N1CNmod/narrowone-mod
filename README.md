@@ -1,4 +1,4 @@
-# narrowone-mod
+# Narrowone-mod
 This is a group of cool mods for narrow.one including lots of features. They are all made by N1CN members. We encourage everyone to use these mods in gameplays.
 
 # Overview
