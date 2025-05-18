@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         Narrow.One K/D HUD
+// @name         Narrow.One K/D Display
 // @namespace    http://tampermonkey.net/
 // @version      1.0
 // @description  Show kills, deaths, and K/D ratio in Narrow.One
-// @author       your_name
+// @author       Wolfart
 // @match        *://*.narrow.one/*
 // @grant        none
 // ==/UserScript==
