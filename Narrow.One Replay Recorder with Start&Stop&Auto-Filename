@@ -1,0 +1,130 @@
+// ==UserScript==
+// @name         Narrow.One Replay Recorder with Start/Stop/Auto-Filename
+// @namespace    https://narrow.one/
+// @version      2.0
+// @description  Record last 60s in Narrow.One. Press R to start, H to save.
+// @author       CNN
+// @match        *://narrow.one/*
+// @grant        none
+// ==/UserScript==
+
+(function () {
+    'use strict';
+
+    const MAX_SECONDS = 60;
+    let mediaRecorder;
+    let recordedChunks = [];
+    let isRecording = false;
+    let canvasStream = null;
+
+    // UI Elements
+    const startBtn = document.createElement('button');
+    const saveBtn = document.createElement('button');
+    const statusBox = document.createElement('div');
+
+    Object.assign(startBtn.style, {
+        position: 'fixed', top: '10px', right: '180px', zIndex: 9999,
+        padding: '8px 12px', background: '#222', color: 'white',
+        border: 'none', borderRadius: '6px', cursor: 'pointer',
+        fontSize: '14px', fontFamily: 'sans-serif'
+    });
+    startBtn.textContent = "▶️ Start (R)";
+
+    Object.assign(saveBtn.style, {
+        position: 'fixed', top: '10px', right: '10px', zIndex: 9999,
+        padding: '8px 12px', background: '#444', color: 'white',
+        border: 'none', borderRadius: '6px', cursor: 'pointer',
+        fontSize: '14px', fontFamily: 'sans-serif'
+    });
+    saveBtn.textContent = "🎥 Save (H)";
+    saveBtn.disabled = true;
+
+    Object.assign(statusBox.style, {
+        position: 'fixed', top: '50px', right: '10px', zIndex: 9999,
+        color: '#fff', background: '#000a', padding: '4px 8px',
+        borderRadius: '4px', fontSize: '12px', fontFamily: 'monospace'
+    });
+
+    document.body.appendChild(startBtn);
+    document.body.appendChild(saveBtn);
+    document.body.appendChild(statusBox);
+
+    function updateStatus(msg) {
+        statusBox.textContent = msg;
+    }
+
+    function setupRecorder(canvas) {
+        canvasStream = canvas.captureStream(30);
+        mediaRecorder = new MediaRecorder(canvasStream, {
+            mimeType: 'video/webm; codecs=vp8',
+            videoBitsPerSecond: 2500000
+        });
+
+        recordedChunks = [];
+
+        mediaRecorder.ondataavailable = function (e) {
+            if (e.data.size > 0) {
+                recordedChunks.push(e.data);
+                if (recordedChunks.length > MAX_SECONDS) recordedChunks.shift();
+            }
+        };
+
+        mediaRecorder.start(1000);
+        isRecording = true;
+        saveBtn.disabled = false;
+        updateStatus("🔴 Recording (up to 60s)...");
+
+        console.warn("[Replay Recorder] Only canvas (game) is recorded. DOM overlays (kill feed, names) are NOT captured.");
+    }
+
+    function stopAndSave() {
+        if (!isRecording) return;
+
+        mediaRecorder.stop();
+        isRecording = false;
+        saveBtn.disabled = true;
+        updateStatus("💾 Saving clip...");
+
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+
+        const now = new Date();
+        const name = `n1-clip-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}.webm`;
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = name;
+        a.click();
+
+        updateStatus("✅ Saved. Press R to record again.");
+        console.log(`[Replay Recorder] Saved as ${name}`);
+    }
+
+    // Event bindings
+    startBtn.onclick = () => {
+        if (!isRecording) {
+            const canvas = document.querySelector('canvas');
+            if (canvas && canvas.captureStream) {
+                setupRecorder(canvas);
+            } else {
+                alert("Canvas not found. Game might not be loaded yet.");
+            }
+        }
+    };
+
+    saveBtn.onclick = stopAndSave;
+
+    document.addEventListener('keydown', e => {
+        if (e.key.toLowerCase() === 'r' && !isRecording) {
+            const canvas = document.querySelector('canvas');
+            if (canvas && canvas.captureStream) {
+                setupRecorder(canvas);
+            }
+        }
+        if (e.key.toLowerCase() === 'h' && isRecording) {
+            stopAndSave();
+        }
+    });
+
+    updateStatus("⏸️ Idle. Press R or Start.");
+})();
