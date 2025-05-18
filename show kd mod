@@ -1,0 +1,74 @@
+// ==UserScript==
+// @name         Narrow.One K/D HUD
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  Show kills, deaths, and K/D ratio in Narrow.One
+// @author       your_name
+// @match        *://*.narrow.one/*
+// @grant        none
+// ==/UserScript==
+
+(function () {
+    'use strict';
+
+    let lastStats = { kills: 0, deaths: 0 };
+
+    function createKDUI() {
+        const div = document.createElement('div');
+        div.id = 'kd-hud';
+        div.innerHTML = `Kills: 0 / Deaths: 0 (K/D: 0.00)`;
+        Object.assign(div.style, {
+            position: 'fixed',
+            top: '10px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'rgba(0, 0, 0, 0.7)',
+            color: '#fff',
+            padding: '8px 16px',
+            fontSize: '16px',
+            fontFamily: 'Bebas Neue, sans-serif',
+            borderRadius: '8px',
+            zIndex: 9999,
+            boxShadow: '0 0 10px rgba(255,255,255,0.2)',
+        });
+        document.body.appendChild(div);
+    }
+
+    function updateKDUI(kills, deaths) {
+        const div = document.getElementById('kd-hud');
+        if (!div) return;
+
+        const kd = deaths === 0 ? kills : (kills / deaths).toFixed(2);
+        div.textContent = `Kills: ${kills} / Deaths: ${deaths} (K/D: ${kd})`;
+    }
+
+    function getPlayerStats() {
+        const meRow = [...document.querySelectorAll('.playersListItem')]
+            .find(row => row.querySelector('.players-list-label')?.textContent.includes('You'));
+
+        if (!meRow) return null;
+
+        const scoreCells = meRow.querySelectorAll('.playersListItemScore');
+        const kills = parseInt(scoreCells[1]?.textContent || '0');
+        const deaths = parseInt(scoreCells[2]?.textContent || '0');
+
+        return { kills, deaths };
+    }
+
+    function tick() {
+        const stats = getPlayerStats();
+        if (!stats) return;
+
+        if (stats.kills !== lastStats.kills || stats.deaths !== lastStats.deaths) {
+            lastStats = stats;
+            updateKDUI(stats.kills, stats.deaths);
+        }
+    }
+
+    function init() {
+        createKDUI();
+        setInterval(tick, 1000);
+    }
+
+    window.addEventListener('load', () => setTimeout(init, 2000));
+})();
