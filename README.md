@@ -71,6 +71,8 @@ Open [Narrow One](https://narrow.one/) and reload the web page.
 
 [Duck (duck26122009)](https://github.com/Duckynolucky)
 
+[Wolfart (tm_design)](https://www.youtube.com/@N1-WOLFART)
+
 CNN (cnn45000)
 
 
@@ -81,7 +83,7 @@ N1CN itch: https://n1cn.itch.io/
 
 N1CN official website: https://n1cn.mystrikingly.com/
 
-Other CN members' page: [Duck](https://github.com/Duckynolucky) & [parrol](https://github.com/parrol-CN)
+Other CN members' page: [Duck](https://github.com/Duckynolucky) & [parrol](https://github.com/parrol-CN) & [Wolfart](https://github.com/N1-wolfart)
 
 # Study Resources(For coders)
 JavaScript & CSS: https://www.w3schools.com/JS/
