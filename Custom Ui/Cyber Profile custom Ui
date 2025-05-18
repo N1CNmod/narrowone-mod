@@ -1,0 +1,64 @@
+// ==UserScript==
+// @name         Subtle Wide Cyber Profile Background
+// @namespace    http://tampermonkey.net/
+// @version      1.4
+// @author       wolfart
+// @description  Slightly wider version of the sleek cyber-style profile for Narrow.One
+// @match        https://narrow.one/
+// @grant        GM_addStyle
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    GM_addStyle(`
+        .main-menu-corner-profile {
+            width: 300px !important; /* 横長に変更 */
+            display: flex !important;
+            gap: 14px !important;
+            margin: 10px !important;
+            padding: 16px 22px !important; /* 左右余白を少し大きく */
+            background:
+                linear-gradient(135deg, rgba(0,255,255,0.08), rgba(0,80,100,0.12)),
+                url(https://cdn.discordapp.com/attachments/1345596253546741790/1351928795463942144/download_3_1.jpg?ex=67dc294e&is=67dad7ce&hm=6550c054cbd5a4edfbcfe29c24a7f5145bffd219b6639b38cfcdce9822d1ac05) center/cover no-repeat !important;
+            backdrop-filter: blur(15px) brightness(1.1) contrast(1.05) !important;
+            border-radius: 20px !important;
+            box-shadow: 0 0 8px rgba(0, 255, 255, 0.2), inset 0 0 6px rgba(0, 200, 255, 0.15) !important;
+            border: 1px solid rgba(0, 200, 255, 0.3) !important;
+            cursor: pointer !important;
+            pointer-events: auto !important;
+            align-items: center !important;
+            position: relative;
+            overflow: hidden;
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }
+
+        .main-menu-corner-profile::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, #0ffcff22, transparent, #00aaff22);
+            animation: rotateGlow 8s linear infinite;
+            pointer-events: none;
+            border-radius: 20px;
+            mix-blend-mode: screen;
+            filter: blur(10px);
+            z-index: 0;
+        }
+
+        .main-menu-corner-profile:hover {
+            box-shadow:
+                0 0 12px rgba(0, 255, 255, 0.35),
+                inset 0 0 10px rgba(0, 200, 255, 0.2) !important;
+            transform: scale(1.03);
+        }
+
+        @keyframes rotateGlow {
+            from { transform: rotate(0deg);}
+            to { transform: rotate(360deg);}
+        }
+    `);
+})();
