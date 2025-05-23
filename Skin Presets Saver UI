@@ -1,8 +1,9 @@
-/ ==UserScript==
+// ==UserScript==
 // @name         Skin Presets Saver UI
 // @namespace    http://tampermonkey.net/
 // @version      1.0
 // @description  Export/Import skinPresets from IndexedDB with UI. use "+" to open menu
+// @author       CNN
 // @match        https://narrow.one/*
 // @grant        none
 // ==/UserScript==
@@ -10,7 +11,7 @@
 (function () {
     'use strict';
 
-    let menu, toggleBtn;
+    let menu;
 
     // Access IndexedDB (keyValuesDb)
     const waitForDB = async () => {
@@ -218,5 +219,3 @@
     window.addEventListener("load", createUI);
 
 })();
-message.txt
-8 KB
