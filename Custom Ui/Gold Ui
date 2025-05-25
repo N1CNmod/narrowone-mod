@@ -1,0 +1,192 @@
+// ==UserScript==
+// @name         Narrow one - Gold UI
+// @namespace    http://tampermonkey.net/
+// @version      1.3
+// @description  UI
+// @author       Duck
+// @match        https://narrow.one/*
+// @grant        GM_addStyle
+// @run-at       document-start
+// ==/UserScript==
+
+(function () {
+    'use strict';
+
+    // === MỞ KHÓA GEAR MÙA ===
+    const originalFetch = window.fetch;
+    window.fetch = async function (...args) {
+        if (args[0].includes('shopConfig.json')) {
+            const response = await originalFetch.apply(this, args);
+            if (!response.ok) return response;
+            const json = await response.json();
+            json.purchasableItems.forEach(item => {
+                if (item.shopVisibility && !item.price) {
+                    delete item.shopVisibility;
+                }
+            });
+            return new Response(JSON.stringify({
+                purchasableItems: json.purchasableItems,
+                skinPresets: json.skinPresets
+            }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+        return originalFetch.apply(this, args);
+    };
+
+    // === FONT + STYLE UI MÙA HÈ + MENU SÁT PHẢI ===
+    const style = document.createElement("style");
+    style.textContent = `
+        * { font-family: 'Comic Neue', cursive !important; }
+
+        .main-menu-button-text, .dialog-button, .dialogTitle, .dialogText,
+        h2.dialogTitle, span, h3 {
+            background: linear-gradient(90deg, #FFA500, #FFD700, #FFA500);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientSummerText 5s ease infinite;
+        }
+
+        @keyframes gradientSummerText {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .dialog, .dialog-button, .ownedCoinsContainer, .health-ui-container,
+        .shopItem, .menu-buttons-container, .main-menu-button, .chat-container,
+        button.main-menu-corner-profile {
+            background: linear-gradient(135deg, #FFA500, #FFD700, #FF8C00) !important;
+            border-radius: 25px !important;
+            color: white !important;
+            border: 2px solid rgba(255,255,255,0.2);
+            animation: summerShift 5s linear infinite;
+            background-size: 400% 400%;
+        }
+
+        @keyframes summerShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* MENU SÁT PHẢI DƯỚI MÀN HÌNH */
+        .main-menu-top-left {
+            position: fixed !important;
+            bottom: 60px !important;
+            right: 20px !important;
+            transform: none !important;
+            display: flex !important;
+            flex-direction: row !important;
+            justify-content: flex-end !important;
+            align-items: center !important;
+            gap: 12px !important;
+            z-index: 99999 !important;
+            background: linear-gradient(135deg, #FFA500, #FFD700, #FF8C00) !important;
+            border-radius: 16px !important;
+            padding: 8px 16px !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .main-menu-top-left button,
+        .main-menu-top-left .main-menu-button {
+            background: rgba(255,255,255,0.1) !important;
+            border-radius: 10px !important;
+            padding: 8px 12px !important;
+            color: white !important;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        /* Logo + Phiên bản */
+        #custom-logo {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            width: 80px;
+            height: 80px;
+            opacity: 0.9;
+            z-index: 9999;
+            animation: pulse 3s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        #version-text {
+            position: fixed;
+            bottom: 6px;
+            left: 100px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+            font-family: 'Comic Neue', cursive;
+            z-index: 9999;
+        }
+    `;
+    document.head.appendChild(style);
+
+    // === FONT GOOGLE
+    const font = document.createElement('link');
+    font.href = 'https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap';
+    font.rel = 'stylesheet';
+    document.head.appendChild(font);
+
+    // === LOGO + VERSION HIỂN THỊ
+    window.addEventListener('load', () => {
+        const logo = document.createElement('img');
+        logo.src = 'https://media.discordapp.net/attachments/1341011413518385204/1358336606213242930/Create_a_simple__2D_logo_of_a_duck_with_all_the_letters_hidden_within_one_letter_D__on_a_white_background-removebg-preview.png?ex=67f3790b&is=67f2278b&hm=6dc40a565abbfea18391c460a291a1d54b47d32e94fd8ce9686711d7f8cedc1f&=&format=webp&quality=lossless&width=375&height=375';
+        logo.id = 'custom-logo';
+        document.body.appendChild(logo);
+
+        const version = document.createElement('div');
+        version.id = 'version-text';
+        version.textContent = 'version1.5 – Summer UI + Right Menu';
+        document.body.appendChild(version);
+    });
+
+    // === THANH MÁU CẦU VỒNG
+    function rainbowHealth() {
+        let hue = 0;
+        setInterval(() => {
+            hue = (hue + 2) % 360;
+            document.querySelectorAll("div[class*='health']").forEach(bar => {
+                bar.style.filter = `hue-rotate(${hue}deg)`;
+            });
+        }, 100);
+    }
+
+    function waitForHealthBar() {
+        if (document.querySelector("div[class*='health']")) {
+            rainbowHealth();
+        } else {
+            setTimeout(waitForHealthBar, 300);
+        }
+    }
+
+    waitForHealthBar();
+
+    // === ĐẢM BẢO MENU ÁP DỤNG VỊ TRÍ SÁT PHẢI
+    const interval = setInterval(() => {
+        const menu = document.querySelector('.main-menu-top-left');
+        if (menu) {
+            clearInterval(interval);
+            menu.style.bottom = '60px';
+            menu.style.right = '20px';
+            menu.style.left = '';
+            menu.style.transform = 'none';
+            menu.style.display = 'flex';
+            menu.style.flexDirection = 'row';
+            menu.style.justifyContent = 'flex-end';
+            menu.style.alignItems = 'center';
+            menu.style.gap = '12px';
+        }
+    }, 500);
+})();
+
+
