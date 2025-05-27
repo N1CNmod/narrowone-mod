@@ -1,0 +1,68 @@
+// ==UserScript==
+// @name         Narrow.One - Confortable Light Yellow UI
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  UI mod for Narrow.One, toggle light mod in settings to use it
+// @author       CNN
+// @match        https://narrow.one/*
+// @grant        GM_addStyle
+// ==/UserScript==
+
+(function () {
+  'use strict';
+   const root = document.documentElement;
+   root.style.setProperty('--default-ui-bg-color', '#f7f0d8');
+   root.style.setProperty('--blue-highlight-color', '#3a2f1c');
+   root.style.setProperty('--default-text-color', '#3a2f1c');
+
+  GM_addStyle(`
+    .settings-group-header {
+      position: sticky;
+      top: -5px;
+      margin: 0px;
+      background: unset !important;
+      padding-top: 5px;
+      padding-bottom: 10px;
+    }
+
+    .dialog.wrinkledPaper,
+    .chat-container,
+    .health-ui-container
+     {
+        border-radius: 20px;
+        background: linear-gradient(135deg, #f0e6d2, #c3b091);
+        color: #3a2f1c;
+        --wrinkled-paper-border-size: 3;
+       --wrinkled-paper-border-size-bottom: 6;
+       --wrinkled-paper-border-color:#3a2f1c;
+       --wrinkled-paper-seed: 70;
+       --wrinkled-paper-wrinkle-size: 2px;
+       --wrinkled-paper-border-segments: 0.02;
+       --wrinkled-paper-tear-count-min: 0;
+       --wrinkled-paper-tear-count-max: 0;
+    }
+
+    .profile-stats .profile-stat {
+      background: #f7f0d8;
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin: 6px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 600;
+    }
+
+    .profile-stats .profile-stat-icon {
+      width: 24px;
+      height: 24px;
+      background-size: contain !important;
+      margin-right: 8px;
+    }
+    .whiteBigText {
+        color: #f7f0d8;
+        -webkit-text-stroke: 1px #3a2f1c ;
+        filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.3));
+    }
+  `);
+})();
