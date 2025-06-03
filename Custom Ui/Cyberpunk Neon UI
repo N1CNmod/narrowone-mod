@@ -1,0 +1,252 @@
+// ==UserScript==
+// @name         Cyberpunk Neon UI for Narrow.one
+// @namespace    http://tampermonkey.net/
+// @version      1.3
+// @description  Cyberpunk 2077 inspired UI overhaul for Narrow.one
+// @author       Wurenjun
+// @match        https://narrow.one/
+// @icon         https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_RHuWJ2giDdudTWazZMx_yRrxbK3HxBaRLA&s
+// @grant        GM_addStyle
+// @require      https://code.jquery.com/jquery-3.6.0.min.js
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // Add cyberpunk font（字体）
+    GM_addStyle(`
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Rajdhani:wght@300;500;700&display=swap');
+
+    * {
+        font-family: 'Rajdhani', sans-serif !important;
+        font-weight: 500 !important;
+    }
+    `);
+
+    // Add cyberpunk style and colors（颜色/基础造型）
+    GM_addStyle(`
+    :root {
+        --cyberpunk-pink: #ff2a6d;
+        --cyberpunk-blue: #05d9e8;
+        --cyberpunk-purple: #d300c5;
+        --cyberpunk-yellow: #f9f002;
+        --cyberpunk-dark: #0d0221;
+        --cyberpunk-dark-blue: #1b1b3a;
+        --cyberpunk-text-glow: 0 0 10px var(--cyberpunk-blue), 0 0 20px var(--cyberpunk-blue);
+        --cyberpunk-box-glow: 0 0 10px var(--cyberpunk-pink), 0 0 20px var(--cyberpunk-pink);
+    }
+
+    body {
+        background-color: var(--cyberpunk-dark) !important;
+    }
+
+    /* Main dialog boxes */
+    .dialog {
+        background-color: rgba(13, 2, 33, 0.85) !important;
+        border: 2px solid var(--cyberpunk-blue) !important;
+        box-shadow: var(--cyberpunk-box-glow) !important;
+        border-radius: 5px !important;
+        backdrop-filter: blur(5px);
+    }
+
+    /* Buttons */
+    .dialog-button {
+        background: linear-gradient(90deg, var(--cyberpunk-dark-blue), var(--cyberpunk-dark)) !important;
+        border: 1px solid var(--cyberpunk-blue) !important;
+        color: var(--cyberpunk-blue) !important;
+        text-shadow: var(--cyberpunk-text-glow) !important;
+        border-radius: 0 !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .dialog-button:hover {
+        background: linear-gradient(90deg, var(--cyberpunk-pink), var(--cyberpunk-purple)) !important;
+        color: white !important;
+        box-shadow: 0 0 15px var(--cyberpunk-pink) !important;
+    }
+
+    /* Input fields */
+    .dialog-text-input, .join-squad-input {
+        background: rgba(27, 27, 58, 0.7) !important;
+        border: 1px solid var(--cyberpunk-blue) !important;
+        color: var(--cyberpunk-yellow) !important;
+        text-shadow: var(--cyberpunk-text-glow) !important;
+    }
+
+    input::placeholder {
+        color: var(--cyberpunk-blue) !important;
+        opacity: 0.7 !important;
+    }
+
+    /* Menu buttons */
+    .main-menu-button {
+        background: rgba(13, 2, 33, 0.8) !important;
+        border: 1px solid var(--cyberpunk-blue) !important;
+        box-shadow: var(--cyberpunk-box-glow) !important;
+    }
+
+    .main-menu-button:hover {
+        border-color: var(--cyberpunk-pink) !important;
+        box-shadow: 0 0 15px var(--cyberpunk-pink) !important;
+    }
+
+    /* Profile section */
+    .main-menu-corner-profile {
+        background: linear-gradient(135deg, var(--cyberpunk-dark-blue), var(--cyberpunk-dark)) !important;
+        border: 1px solid var(--cyberpunk-pink) !important;
+        box-shadow: var(--cyberpunk-box-glow) !important;
+    }
+
+    /* Health UI */
+    .health-ui-container {
+        background: rgba(13, 2, 33, 0.8) !important;
+        border: 1px solid var(--cyberpunk-pink) !important;
+        box-shadow: var(--cyberpunk-box-glow) !important;
+    }
+
+    /* Chat container */
+    .chat-container {
+        background: rgba(13, 2, 33, 0.8) !important;
+        border: 1px solid var(--cyberpunk-blue) !important;
+        box-shadow: var(--cyberpunk-box-glow) !important;
+    }
+
+    .chat-log-container {
+        color: var(--cyberpunk-yellow) !important;
+        text-shadow: var(--cyberpunk-text-glow) !important;
+    }
+
+    /* Scoreboard */
+    .playersListTeam {
+        background: rgba(27, 27, 58, 0.7) !important;
+        border: 1px solid var(--cyberpunk-blue) !important;
+    }
+
+    /* Shop items */
+    .shopItem {
+        background: rgba(13, 2, 33, 0.8) !important;
+        border: 1px solid var(--cyberpunk-purple) !important;
+    }
+
+    /* Class selection */
+    .class-selection-image-container {
+        border: 1px solid var(--cyberpunk-blue) !important;
+        box-shadow: var(--cyberpunk-box-glow) !important;
+    }
+
+
+    /* Score indicators */
+    .flag-score-container, .elimination-score-container {
+        background: rgba(13, 2, 33, 0.9) !important;
+        border: 1px solid var(--cyberpunk-blue) !important;
+        box-shadow: var(--cyberpunk-box-glow) !important;
+    }
+
+    /* Add neon grid background to some elements */
+    .dialog, .main-menu-button, .shopItem {
+        background-image:
+            linear-gradient(rgba(5, 217, 232, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(5, 217, 232, 0.1) 1px, transparent 1px) !important;
+        background-size: 20px 20px !important;
+    }
+
+    /* Cyberpunk scrollbars */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: var(--cyberpunk-dark);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--cyberpunk-pink);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--cyberpunk-blue);
+    }
+
+    /* Special text classes */
+    .whiteBigText, .blueNight {
+        color: var(--cyberpunk-blue) !important;
+        text-shadow: var(--cyberpunk-text-glow) !important;
+        font-weight: 700 !important;
+        letter-spacing: 1px !important;
+    }
+
+    .coin-count-text {
+        color: var(--cyberpunk-yellow) !important;
+        text-shadow: 0 0 10px var(--cyberpunk-yellow) !important;
+    }
+
+    /* Add scanline effect to dialogs */
+    .dialog::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background:
+            linear-gradient(
+                rgba(5, 217, 232, 0.1) 1px,
+                transparent 1px
+            );
+        background-size: 100% 2px;
+        pointer-events: none;
+        animation: scanline 10s linear infinite;
+    }
+
+    @keyframes scanline {
+        0% { background-position: 0 0; }
+        100% { background-position: 0 100%; }
+    }
+
+    /* Add subtle flicker animation to neon elements */
+    @keyframes flicker {
+        0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+            opacity: 1;
+        }
+        20%, 22%, 24%, 55% {
+            opacity: 0.7;
+        }
+    }
+
+    .dialog, .main-menu-button, .health-ui-container, .chat-container {
+        animation: flicker 15s infinite alternate;
+    }
+    `);
+
+
+
+    // Add cyberpunk loading animation（添加赛博朋克加载动画）
+    const loadingStyle = document.createElement('style');
+    loadingStyle.innerHTML = `
+    @keyframes cyberpunkLoading {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
+    .loading-bar::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg,
+            transparent,
+            var(--cyberpunk-pink),
+            var(--cyberpunk-blue),
+            transparent);
+        animation: cyberpunkLoading 2s infinite;
+    }
+    `;
+    document.head.appendChild(loadingStyle);
+
+    console.log('Cyberpunk UI 加载成功✅!');
+})();
+
