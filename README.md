@@ -73,6 +73,8 @@ Open [Narrow One](https://narrow.one/) and reload the web page.
 
 [Wolfart (tm_design)](https://www.youtube.com/@N1-WOLFART)
 
+[Riptide (nova_riptide)](https://www.youtube.com/@Riptide.n1/videos)
+
 CNN (cnn45000)
 
 
@@ -83,7 +85,7 @@ N1CN itch: https://n1cn.itch.io/
 
 N1CN official website: https://n1cn.mystrikingly.com/
 
-Other CN members' page: [Duck](https://github.com/Duckynolucky) & [parrol](https://github.com/parrol-CN) & [Wolfart](https://github.com/N1-wolfart)
+Other CN members' page: [Duck](https://github.com/Duckynolucky) & [parrol](https://github.com/parrol-CN) & [Wolfart](https://github.com/N1-wolfart) & [Riptide](https://github.com/RiptideN1)
 
 # Study Resources(For coders)
 JavaScript & CSS: https://www.w3schools.com/JS/
