@@ -1,0 +1,548 @@
+// ==UserScript==
+// @name         Cyberpunk ui V2 for Narrow.one(Gradient Color)
+// @namespace    http://tampermonkey.net/
+// @version      2.0
+// @description  Another version of the cyber ui
+// @author       Wurenjun
+// @match        https://narrow.one/
+// @icon         https://static.vecteezy.com/system/resources/previews/011/773/954/non_2x/samurai-head-cyberpunk-logo-fiction-colorful-design-illustration-vector.jpg
+// @grant        GM_addStyle
+// @require      https://code.jquery.com/jquery-3.6.0.min.js
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // 版本2，增加渐变色效果，增大字体，同时调整部分区块的element排列
+    GM_addStyle(`
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Rajdhani:wght@300;500;700&display=swap');
+
+    :root {
+        --neon-pink: #ff2a6d;
+        --neon-blue: #05d9e8;
+        --neon-purple: #d300c5;
+        --neon-yellow: #f9f002;
+        --neon-green: #00ff9d;
+        --cyber-dark: #0d0221;
+        --cyber-dark-2: #1b1b3a;
+        --cyber-dark-3: #2a2a4a;
+        --text-glow-blue: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue);
+        --text-glow-pink: 0 0 10px var(--neon-pink), 0 0 20px var(--neon-pink);
+        --box-glow-blue: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue), 0 0 30px rgba(5, 217, 232, 0.3);
+        --box-glow-pink: 0 0 10px var(--neon-pink), 0 0 20px var(--neon-pink), 0 0 30px rgba(255, 42, 109, 0.3);
+        --neon-border: 1px solid rgba(5, 217, 232, 0.5);
+        --neon-border-alt: 1px solid rgba(255, 42, 109, 0.5);
+    }
+
+    body {
+        background-color: var(--cyber-dark) !important;
+        overflow-x: hidden;
+    }
+
+    .dialog {
+        background: rgba(13, 2, 33, 0.95) !important;
+        border: var(--neon-border) !important;
+        box-shadow: var(--box-glow-blue) !important;
+        border-radius: 4px !important;
+        backdrop-filter: blur(8px);
+        border-image: linear-gradient(160deg, var(--neon-blue), var(--neon-purple)) 1;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dialog::before {
+        content: "";
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(160deg, var(--neon-blue), var(--neon-purple));
+        z-index: -1;
+        filter: blur(20px);
+        opacity: 0.7;
+    }
+
+    .dialog-button {
+        background: linear-gradient(135deg, rgba(27, 27, 58, 0.8), rgba(13, 2, 33, 0.9)) !important;
+        border: var(--neon-border) !important;
+        color: var(--neon-blue) !important;
+        text-shadow: var(--text-glow-blue) !important;
+        border-radius: 0 !important;
+        transition: all 0.3s ease !important;
+        position: relative;
+        overflow: hidden;
+        font-weight: 700 !important;
+        letter-spacing: 1px !important;
+    }
+
+    .dialog-button:hover {
+        background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple)) !important;
+        color: white !important;
+        text-shadow: var(--text-glow-pink) !important;
+        box-shadow: var(--box-glow-pink) !important;
+        border: var(--neon-border-alt) !important;
+    }
+
+    .dialog-button::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: 0.5s;
+    }
+
+    .dialog-button:hover::after {
+        left: 100%;
+    }
+
+    .dialog-text-input, .join-squad-input, .dialog-select-input {
+        background: rgba(27, 27, 58, 0.7) !important;
+        border: var(--neon-border) !important;
+        color: var(--neon-yellow) !important;
+        text-shadow: var(--text-glow-blue) !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .dialog-text-input:focus, .join-squad-input:focus {
+        border-color: var(--neon-pink) !important;
+        box-shadow: var(--box-glow-pink) !important;
+    }
+
+    input::placeholder {
+        color: var(--neon-blue) !important;
+        opacity: 0.7 !important;
+        font-style: italic !important;
+    }
+
+    .main-menu-button {
+        background: rgba(13, 2, 33, 0.9) !important;
+        border: var(--neon-border) !important;
+        box-shadow: var(--box-glow-blue) !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .main-menu-button:hover {
+        border-color: var(--neon-pink) !important;
+        box-shadow: var(--box-glow-pink) !important;
+        transform: translateY(-2px) !important;
+    }
+
+    .menu-buttons-container {
+        background: rgba(13, 2, 33, 0.9) !important;
+        border: var(--neon-border) !important;
+        box-shadow: var(--box-glow-blue) !important;
+    }
+
+    .main-menu-corner-profile {
+        background: linear-gradient(135deg, rgba(27, 27, 58, 0.9), rgba(13, 2, 33, 0.95)) !important;
+        border: var(--neon-border-alt) !important;
+        box-shadow: var(--box-glow-pink) !important;
+    }
+
+    .avatar {
+        border: 2px solid var(--neon-blue) !important;
+        box-shadow: 0 0 10px var(--neon-blue) !important;
+    }
+
+    .health-ui-container {
+        background: rgba(13, 2, 33, 0.9) !important;
+        border: var(--neon-border-alt) !important;
+        box-shadow: var(--box-glow-pink) !important;
+    }
+
+    .chat-container {
+        background: rgba(13, 2, 33, 0.9) !important;
+        border: var(--neon-border) !important;
+        box-shadow: var(--box-glow-blue) !important;
+    }
+
+    .chat-log-container {
+        color: var(--neon-yellow) !important;
+        text-shadow: var(--text-glow-blue) !important;
+    }
+
+    .playersListTeam {
+        background: rgba(27, 27, 58, 0.8) !important;
+        border: var(--neon-border) !important;
+    }
+
+    .shopItem {
+        background: rgba(13, 2, 33, 0.9) !important;
+        border: var(--neon-border-alt) !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .shopItem:hover {
+        box-shadow: var(--box-glow-pink) !important;
+        transform: scale(1.02) !important;
+    }
+
+    .class-selection-image-container {
+        border: var(--neon-border) !important;
+        box-shadow: var(--box-glow-blue) !important;
+    }
+
+
+    .flag-score-container, .elimination-score-container {
+        background: rgba(13, 2, 33, 0.95) !important;
+        border: var(--neon-border) !important;
+        box-shadow: var(--box-glow-blue) !important;
+    }
+
+
+    .dialog, .main-menu-button, .shopItem, .class-selection-image-container {
+        background-image:
+            linear-gradient(rgba(5, 217, 232, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(5, 217, 232, 0.05) 1px, transparent 1px),
+            linear-gradient(rgba(13, 2, 33, 0.9), rgba(13, 2, 33, 0.9)) !important;
+        background-size: 25px 25px, 25px 25px, auto !important;
+    }
+
+
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: var(--cyber-dark-3);
+        border: var(--neon-border);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(var(--neon-pink), var(--neon-purple));
+        border-radius: 2px;
+        border: 1px solid var(--neon-blue);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(var(--neon-blue), var(--neon-green));
+    }
+
+    .whiteBigText, .blueNight {
+        color: var(--neon-blue) !important;
+        text-shadow: var(--text-glow-blue) !important;
+        font-weight: 700 !important;
+        letter-spacing: 1px !important;
+        font-family: 'Orbitron', sans-serif !important;
+    }
+
+    .coin-count-text {
+        color: var(--neon-yellow) !important;
+        text-shadow: 0 0 10px var(--neon-yellow), 0 0 20px rgba(249, 240, 2, 0.5) !important;
+        font-family: 'Major Mono Display', monospace !important;
+    }
+
+
+    .dialog::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+            rgba(5, 217, 232, 0.1) 1px,
+            transparent 1px
+        );
+        background-size: 100% 3px;
+        pointer-events: none;
+        animation: scanline 8s linear infinite;
+        opacity: 0.6;
+    }
+
+    @keyframes scanline {
+        0% { background-position: 0 0; }
+        100% { background-position: 0 100%; }
+    }
+
+    @keyframes neonFlicker {
+        0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+            opacity: 1;
+            text-shadow: var(--text-glow-blue);
+        }
+        20%, 22%, 24%, 55% {
+            opacity: 0.8;
+            text-shadow: none;
+        }
+    }
+
+    .blueNight {
+        animation: neonFlicker 10s infinite alternate;
+    }
+
+    @keyframes pulseGlow {
+        0% {
+            box-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue);
+        }
+        50% {
+            box-shadow: 0 0 15px var(--neon-blue), 0 0 30px var(--neon-blue);
+        }
+        100% {
+            box-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue);
+        }
+    }
+
+    .dialog-button, .main-menu-button {
+        animation: pulseGlow 4s infinite;
+    }
+
+
+    .dialog::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        border-width: 0 30px 30px 0;
+        border-style: solid;
+        border-color: transparent var(--neon-blue) transparent transparent;
+        box-shadow: -5px 5px 10px rgba(5, 217, 232, 0.3);
+    }
+
+    .weaponSelectionDialog {
+        background: rgba(13, 2, 33, 0.95) !important;
+        border: var(--neon-border-alt) !important;
+        box-shadow: var(--box-glow-pink) !important;
+    }
+
+    .squad-players-list {
+        background: rgba(27, 27, 58, 0.9) !important;
+        border: var(--neon-border) !important;
+    }
+
+
+    .dialog-select-wrapper, .dialog-checkbox-input, .dialog-toggle-input,
+    input.dialog-range-input[type="range"], .dialog-color-input {
+        background: rgba(27, 27, 58, 0.7) !important;
+        border: var(--neon-border) !important;
+        box-shadow: 0 0 10px rgba(5, 217, 232, 0.3) !important;
+    }
+
+    input.dialog-range-input[type="range"]::-webkit-slider-thumb {
+        background: var(--neon-pink) !important;
+        box-shadow: 0 0 10px var(--neon-pink) !important;
+    }
+
+    .dialog-checkbox-input:checked::before {
+        background: var(--neon-blue) !important;
+        box-shadow: 0 0 10px var(--neon-blue) !important;
+    }
+    `);
+
+    // 添加渐变背景
+    const bgStyle = document.createElement('style');
+    bgStyle.innerHTML = `
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background:
+            radial-gradient(circle at 20% 30%, rgba(255, 42, 109, 0.15) 0%, transparent 25%),
+            radial-gradient(circle at 80% 70%, rgba(5, 217, 232, 0.15) 0%, transparent 25%),
+            linear-gradient(to bottom, var(--cyber-dark), var(--cyber-dark-2));
+        z-index: -2;
+        pointer-events: none;
+    }
+
+    body::after {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image:
+            linear-gradient(rgba(5, 217, 232, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(5, 217, 232, 0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+        z-index: -1;
+        pointer-events: none;
+        animation: gridScroll 150s linear infinite;
+    }
+
+    @keyframes gridScroll {
+        from { background-position: 0 0; }
+        to { background-position: 1000px 1000px; }
+    }
+
+    /* Floating cyberpunk city silhouette */
+    .cyber-city {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 150px;
+        background-image: url('https://i.imgur.com/X8QjK7S.png');
+        background-repeat: repeat-x;
+        background-position: bottom;
+        opacity: 0.15;
+        z-index: -1;
+        pointer-events: none;
+    }
+
+    /* Animated floating particles */
+    .particles {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        pointer-events: none;
+        overflow: hidden;
+    }
+
+    .particle {
+        position: absolute;
+        background: var(--neon-blue);
+        border-radius: 50%;
+        opacity: 0.3;
+        animation: float linear infinite;
+    }
+
+    @keyframes float {
+        0% {
+            transform: translateY(0) translateX(0);
+            opacity: 0;
+        }
+        10% {
+            opacity: 0.3;
+        }
+        90% {
+            opacity: 0.3;
+        }
+        100% {
+            transform: translateY(-100vh) translateX(20px);
+            opacity: 0;
+        }
+    }
+    `;
+    document.head.appendChild(bgStyle);
+
+    // 添加装饰物
+    const createParticles = () => {
+        const particlesContainer = document.createElement('div');
+        particlesContainer.className = 'particles';
+        document.body.appendChild(particlesContainer);
+
+        for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+
+            // Random properties
+            const size = Math.random() * 3 + 1;
+            const posX = Math.random() * 100;
+            const delay = Math.random() * 15;
+            const duration = Math.random() * 20 + 10;
+            const color = Math.random() > 0.5 ? 'var(--neon-blue)' : 'var(--neon-pink)';
+
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            particle.style.left = `${posX}%`;
+            particle.style.bottom = `-10px`;
+            particle.style.animationDuration = `${duration}s`;
+            particle.style.animationDelay = `${delay}s`;
+            particle.style.background = color;
+
+            particlesContainer.appendChild(particle);
+        }
+    };
+
+    // 定型赛博朋克（确定轮廓）
+    const createCyberCity = () => {
+        const city = document.createElement('div');
+        city.className = 'cyber-city';
+        document.body.appendChild(city);
+    };
+
+    // 改变字体样式和效果
+    const addTypingEffect = () => {
+        const elements = document.querySelectorAll('.blueNight, .whiteBigText');
+        elements.forEach(el => {
+            const text = el.textContent;
+            el.textContent = '';
+
+            let i = 0;
+            const typing = setInterval(() => {
+                if (i < text.length) {
+                    el.textContent += text.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(typing);
+                }
+            }, 50);
+        });
+    };
+
+    // 加载所有前置功能改变
+    window.addEventListener('load', () => {
+        createParticles();
+        createCyberCity();
+        addTypingEffect();
+
+        // 发送全局错误处理信号
+        console.log('%cSYSTEM INITIALIZED', 'color: #05d9e8; font-size: 20px; font-family: "Orbitron", sans-serif;');
+        console.log('%cNEON INTERFACE ENGAGED', 'color: #ff2a6d; font-size: 16px;');
+        console.log('%c>>> WELCOME TO THE GRID <<<', 'color: #f9f002; font-size: 14px;');
+    });
+
+    // 增强工具提示系统
+    GM_addStyle(`
+    [data-cyber-tooltip] {
+        position: relative;
+        cursor: help;
+    }
+
+    [data-cyber-tooltip]::after {
+        content: attr(data-cyber-tooltip);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(13, 2, 33, 0.95);
+        border: var(--neon-border);
+        color: var(--neon-yellow);
+        padding: 5px 10px;
+        font-size: 12px;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s;
+        z-index: 100;
+        box-shadow: var(--box-glow-blue);
+        text-shadow: none;
+    }
+
+    [data-cyber-tooltip]:hover::after {
+        opacity: 1;
+        visibility: visible;
+        bottom: calc(100% + 5px);
+    }
+    `);
+
+    // 添加工具提示系统
+    const addTooltips = () => {
+        setTimeout(() => {
+            const buttons = document.querySelectorAll('.dialog-button');
+            buttons.forEach(btn => {
+                if (!btn.getAttribute('data-cyber-tooltip')) {
+                    const text = btn.textContent.trim();
+                    btn.setAttribute('data-cyber-tooltip', text);
+                }
+            });
+        }, 3000);
+    };
+
+    // 运行代码✅ 设置时间限制
+    setTimeout(addTooltips, 5000);
+})();
+
+
+    //代码完成
