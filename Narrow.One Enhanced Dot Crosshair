@@ -1,0 +1,191 @@
+// ==UserScript==
+// @name         Narrow.One Enhanced Dot Crosshair
+// @namespace    http://tampermonkey.net/
+// @version      3.2
+// @description  Customizable dot crosshair with size, border, and color controls
+// @author       Wurenjun
+// @match        https://narrow.one/*
+// @grant        none
+// @icon         https://cdn-icons-png.flaticon.com/512/172/172850.png
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // Create crosshair dot
+    const dot = document.createElement('div');
+    dot.id = 'custom-crosshair';
+    dot.style.position = 'fixed';
+    dot.style.top = '50%';
+    dot.style.left = '50%';
+    dot.style.transform = 'translate(-50%, -50%)';
+    dot.style.width = '6px';
+    dot.style.height = '6px';
+    dot.style.borderRadius = '50%';
+    dot.style.backgroundColor = 'white';
+    dot.style.border = '1px solid black';
+    dot.style.pointerEvents = 'none';
+    dot.style.zIndex = '9999';
+    dot.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.5)';
+    dot.style.transition = 'all 0.2s ease';
+
+    // Create controls panel
+    const panel = document.createElement('div');
+    panel.id = 'crosshair-controls';
+    panel.style.position = 'fixed';
+    panel.style.bottom = '20px';
+    panel.style.left = '20px';
+    panel.style.backgroundColor = 'rgba(15, 15, 15, 0.9)';
+    panel.style.padding = '20px';
+    panel.style.borderRadius = '12px';
+    panel.style.zIndex = '10000';
+    panel.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.4)';
+    panel.style.backdropFilter = 'blur(5px)';
+    panel.style.border = '1px solid rgba(76, 201, 240, 0.3)';
+    panel.style.width = '300px';
+    panel.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+    panel.style.color = '#e6e6e6';
+    panel.style.display = 'none'; // Hidden by default
+
+    // Panel HTML content
+    panel.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(76, 201, 240, 0.3);">
+            <div style="color: #4cc9f0; font-size: 1.3rem; font-weight: 600;">Crosshair Settings</div>
+            <button id="close-controls" style="background: rgba(200, 50, 50, 0.7); color: white; border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 16px; cursor: pointer; transition: all 0.3s;">×</button>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; color: #a0a0c0;">Dot Size (px)</label>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <input type="range" id="dot-size" min="2" max="20" value="6" style="flex: 1; height: 6px; background: rgba(76, 201, 240, 0.2); border-radius: 3px; outline: none;">
+                <span id="size-value" style="width: 40px; text-align: center; background: rgba(76, 201, 240, 0.1); padding: 5px; border-radius: 4px;">6</span>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; color: #a0a0c0;">Border Width (px)</label>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <input type="range" id="border-width" min="0" max="10" value="1" style="flex: 1; height: 6px; background: rgba(76, 201, 240, 0.2); border-radius: 3px; outline: none;">
+                <span id="border-value" style="width: 40px; text-align: center; background: rgba(76, 201, 240, 0.1); padding: 5px; border-radius: 4px;">1</span>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 25px;">
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <div style="margin-bottom: 8px; color: #a0a0c0;">Dot Color</div>
+                <input type="color" id="dot-color" value="#ffffff" style="width: 40px; height: 40px; border-radius: 8px; cursor: pointer; border: 2px solid rgba(255, 255, 255, 0.2);">
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <div style="margin-bottom: 8px; color: #a0a0c0;">Border Color</div>
+                <input type="color" id="border-color" value="#000000" style="width: 40px; height: 40px; border-radius: 8px; cursor: pointer; border: 2px solid rgba(255, 255, 255, 0.2);">
+            </div>
+        </div>
+
+        <div style="margin-top: 25px; padding: 15px; background: rgba(76, 201, 240, 0.1); border-radius: 8px;">
+            <p style="font-size: 0.9rem; margin: 0 0 8px 0;"><span style="display: inline-block; background: rgba(0, 0, 0, 0.4); border: 1px solid #4cc9f0; padding: 2px 8px; border-radius: 4px; font-family: monospace;">/</span> Toggle settings panel</p>
+            <p style="font-size: 0.9rem; margin: 0 0 8px 0;"><span style="display: inline-block; background: rgba(0, 0, 0, 0.4); border: 1px solid #4cc9f0; padding: 2px 8px; border-radius: 4px; font-family: monospace;">R</span> Toggle crosshair visibility</p>
+        </div>
+
+        <div style="position: absolute; bottom: 15px; right: 15px; font-size: 0.9rem; color: rgba(255, 255, 255, 0.5); font-style: italic;">Made by N1CN❤️</div>
+    `;
+
+    // Create help message
+    const helpMsg = document.createElement('div');
+    helpMsg.id = 'crosshair-help';
+    helpMsg.style.position = 'fixed';
+    helpMsg.style.bottom = '10px';
+    helpMsg.style.left = '10px';
+    helpMsg.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    helpMsg.style.padding = '8px 12px';
+    helpMsg.style.borderRadius = '4px';
+    helpMsg.style.zIndex = '9998';
+    helpMsg.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+    helpMsg.style.fontSize = '0.9rem';
+    helpMsg.style.color = '#ffffff';
+    helpMsg.style.transition = 'opacity 0.3s ease';
+    helpMsg.textContent = 'Press "/" to modify crosshair settings';
+
+    // Add elements to the document
+    document.body.appendChild(dot);
+    document.body.appendChild(panel);
+    document.body.appendChild(helpMsg);
+
+    // Get control elements
+    const sizeSlider = panel.querySelector('#dot-size');
+    const sizeValue = panel.querySelector('#size-value');
+    const borderSlider = panel.querySelector('#border-width');
+    const borderValue = panel.querySelector('#border-value');
+    const dotColor = panel.querySelector('#dot-color');
+    const borderColor = panel.querySelector('#border-color');
+    const closeBtn = panel.querySelector('#close-controls');
+
+    // Update dot size
+    sizeSlider.addEventListener('input', () => {
+        const size = sizeSlider.value;
+        dot.style.width = `${size}px`;
+        dot.style.height = `${size}px`;
+        sizeValue.textContent = size;
+    });
+
+    // Update border width
+    borderSlider.addEventListener('input', () => {
+        const width = borderSlider.value;
+        dot.style.borderWidth = `${width}px`;
+        borderValue.textContent = width;
+
+        // If border is 0, remove border style
+        if (width === '0') {
+            dot.style.border = 'none';
+        } else {
+            dot.style.border = `${width}px solid ${dot.style.borderColor || 'black'}`;
+        }
+    });
+
+    // Update dot color
+    dotColor.addEventListener('input', () => {
+        dot.style.backgroundColor = dotColor.value;
+    });
+
+    // Update border color
+    borderColor.addEventListener('input', () => {
+        dot.style.borderColor = borderColor.value;
+    });
+
+    // Close panel
+    closeBtn.addEventListener('click', () => {
+        panel.style.display = 'none';
+    });
+
+    // Hover effect for close button
+    closeBtn.addEventListener('mouseover', () => {
+        closeBtn.style.transform = 'scale(1.1)';
+        closeBtn.style.background = 'rgba(220, 70, 70, 0.9)';
+    });
+
+    closeBtn.addEventListener('mouseout', () => {
+        closeBtn.style.transform = 'scale(1)';
+        closeBtn.style.background = 'rgba(200, 50, 50, 0.7)';
+    });
+
+    // Toggle panel with '/' key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === '/') {
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+            // Hide help message when panel is shown
+            if (panel.style.display === 'block') {
+                helpMsg.style.opacity = '0';
+                setTimeout(() => helpMsg.style.display = 'none', 300);
+            }
+        }
+        // Toggle dot visibility with 'R' key
+        else if (e.key.toLowerCase() === 'r') {
+            dot.style.display = dot.style.display === 'none' ? 'block' : 'none';
+        }
+    });
+
+    // Hide help message after 10 seconds
+    setTimeout(() => {
+        helpMsg.style.opacity = '0';
+        setTimeout(() => helpMsg.style.display = 'none', 300);
+    }, 10000);
+})();
