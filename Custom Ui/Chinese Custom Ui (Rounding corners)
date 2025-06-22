@@ -2,7 +2,7 @@
 // @name         Chinese Custum Ui (Rounding corners)
 // @namespace    http://tampermonkey.net/
 // @version      1
-// @description  Thêm viền cầu vồng và nền blur 30px vào các container UI
+// @description  idk
 // @author       ραɾɾοɭ & Wurenjun
 // @match        https://narrow.one/
 // @grant        GM_addStyle
@@ -17,12 +17,12 @@ GM_addStyle(`
     .health-ui-container,
     .dialog-button {
         position: fixed;
-        border-radius: 20px; /* Bo góc */
+        border-radius: 20px;
         padding: 20px;
         background: rgba(255, 255, 255, 0.2);
         backdrop-filter: blur(5px);
         border-image: linear-gradient(45deg, red, orange);
-        overflow: visible; /* Đảm bảo không bị cắt nội dung bên trong */
+        overflow: visible;
         box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
     }
 
