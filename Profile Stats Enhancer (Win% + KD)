@@ -1,0 +1,187 @@
+// ==UserScript==
+// @name         Profile Stats Enhancer (Win% + K/D)
+// @namespace    http://tampermonkey.net/
+// @version      1.1
+// @description  Adds Win Percentage and K/D Ratio to profile stats with auto-updating
+// @author       Riptide & Wurenjun
+// @match        https://narrow.one/*
+// @grant        none
+// @icon         https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740
+// ==/UserScript==
+
+(function () {
+    'use strict';
+
+    const DB_NAME = "keyValuesDb";
+    const STORE_NAME = "keyValues";
+    const KEY_NAME = "cachedProfileState";
+
+    const WIN_PERCENTAGE_ICONS = {
+        light: "https://raw.githubusercontent.com/RiptideN1/Mods/main/lightmodetrophy.png",
+        dark: "https://raw.githubusercontent.com/RiptideN1/Mods/main/Trophy-profile-stat-icon.png"
+    };
+
+    const KD_RATIO_ICONS = {
+        light: "https://play-lh.googleusercontent.com/q5_pVBlB4d4aUecTCfwEaGtuQsLs8S0lFnFk0_K3kAxtbAmMDb_UtCA0rAXA7Uj3x0s=w600-h300-pc0xffffff-pd", // Default crosshair icon
+        dark: "https://play-lh.googleusercontent.com/q5_pVBlB4d4aUecTCfwEaGtuQsLs8S0lFnFk0_K3kAxtbAmMDb_UtCA0rAXA7Uj3x0s=w600-h300-pc0xffffff-pd" // Same icon for both themes
+    };
+
+    let lastProfileJSON = null;
+
+    function getProfileState() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(DB_NAME);
+            request.onerror = () => reject("Failed to open IndexedDB");
+            request.onsuccess = () => {
+                const db = request.result;
+                const transaction = db.transaction(STORE_NAME, 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const getRequest = store.get(KEY_NAME);
+                getRequest.onerror = () => reject("Failed to get data");
+                getRequest.onsuccess = () => resolve(getRequest.result);
+            };
+        });
+    }
+
+    function isValidProfile(profile) {
+        return profile &&
+            profile.stats &&
+            typeof profile.stats.gamesPlayed === 'number' &&
+            typeof profile.stats.gamesWon === 'number' &&
+            typeof profile.stats.kills === 'number' &&
+            typeof profile.stats.deaths === 'number';
+    }
+
+    function applyThemeAwareIcon(icon, iconSet) {
+        function updateIcon() {
+            const isDark = document.documentElement.classList.contains('theme-dark');
+            icon.style.background = `url("${isDark ? iconSet.dark : iconSet.light}") no-repeat center center`;
+            icon.style.backgroundSize = 'contain';
+            icon.style.filter = 'none';
+            icon.style.width = '48px';
+            icon.style.height = '48px';
+        }
+        updateIcon();
+        const observer = new MutationObserver(updateIcon);
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['class']
+        });
+    }
+
+    function createOrUpdateStats(profileStats) {
+        const profileStatsContainer = document.querySelector('.profile-stats');
+        if (!profileStatsContainer) return false;
+
+        // Win Percentage Stat
+        let winPercentageWrapper = profileStatsContainer.querySelector('.win-percentage');
+        if (!winPercentageWrapper) {
+            winPercentageWrapper = document.createElement('div');
+            winPercentageWrapper.className = 'wrinkledPaper profile-stat win-percentage';
+            winPercentageWrapper.style.setProperty('--wrinkled-paper-seed', Math.floor(Math.random() * 99999));
+
+            const icon = document.createElement('div');
+            icon.className = 'profile-stat-icon';
+            winPercentageWrapper.appendChild(icon);
+
+            const label = document.createElement('div');
+            label.textContent = 'Win Percentage';
+            winPercentageWrapper.appendChild(label);
+
+            const value = document.createElement('div');
+            value.className = 'win-percentage-value';
+            winPercentageWrapper.appendChild(value);
+
+            profileStatsContainer.appendChild(winPercentageWrapper);
+            applyThemeAwareIcon(icon, WIN_PERCENTAGE_ICONS);
+        }
+
+        // K/D Ratio Stat
+        let kdRatioWrapper = profileStatsContainer.querySelector('.kd-ratio');
+        if (!kdRatioWrapper) {
+            kdRatioWrapper = document.createElement('div');
+            kdRatioWrapper.className = 'wrinkledPaper profile-stat kd-ratio';
+            kdRatioWrapper.style.setProperty('--wrinkled-paper-seed', Math.floor(Math.random() * 99999));
+
+            const icon = document.createElement('div');
+            icon.className = 'profile-stat-icon';
+            kdRatioWrapper.appendChild(icon);
+
+            const label = document.createElement('div');
+            label.textContent = 'K/D Ratio';
+            kdRatioWrapper.appendChild(label);
+
+            const value = document.createElement('div');
+            value.className = 'kd-ratio-value';
+            kdRatioWrapper.appendChild(value);
+
+            profileStatsContainer.appendChild(kdRatioWrapper);
+            applyThemeAwareIcon(icon, KD_RATIO_ICONS);
+        }
+
+        // Update values
+        const winPercentageValue = winPercentageWrapper.querySelector('.win-percentage-value');
+        const kdRatioValue = kdRatioWrapper.querySelector('.kd-ratio-value');
+
+        if (winPercentageValue) {
+            const winPercentage = profileStats.gamesPlayed > 0
+                ? (profileStats.gamesWon / profileStats.gamesPlayed) * 100
+                : 0;
+            winPercentageValue.textContent = `${winPercentage.toFixed(2)}%`;
+        }
+
+        if (kdRatioValue) {
+            const kdRatio = profileStats.deaths > 0
+                ? profileStats.kills / profileStats.deaths
+                : profileStats.kills; // If no deaths, show kills count
+            kdRatioValue.textContent = kdRatio.toFixed(2);
+        }
+
+        return true;
+    }
+
+    async function pollAndUpdate() {
+        try {
+            const profileState = await getProfileState();
+            const profile = profileState ? (profileState.value || profileState) : null;
+            if (!isValidProfile(profile)) return;
+
+            const profileJSON = JSON.stringify(profile.stats);
+            if (profileJSON !== lastProfileJSON) {
+                lastProfileJSON = profileJSON;
+                createOrUpdateStats(profile.stats);
+            }
+        } catch (e) {
+            console.error("Error updating stats:", e);
+        }
+    }
+
+    function observeProfileStatsPresence() {
+        const bodyObserver = new MutationObserver((mutations) => {
+            for (const mutation of mutations) {
+                for (const node of mutation.addedNodes) {
+                    if (!(node instanceof HTMLElement)) continue;
+                    if (node.matches && (node.matches('.profile-stats') ||
+                        node.querySelector('.profile-stats'))) {
+                        lastProfileJSON = null;
+                        pollAndUpdate();
+                    }
+                }
+            }
+        });
+
+        bodyObserver.observe(document.body, { childList: true, subtree: true });
+    }
+
+    function start() {
+        pollAndUpdate();
+        setInterval(pollAndUpdate, 2000);
+        observeProfileStatsPresence();
+    }
+
+    if (document.readyState === 'loading') {
+        window.addEventListener('DOMContentLoaded', start);
+    } else {
+        start();
+    }
+})();
