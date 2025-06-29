@@ -1,0 +1,187 @@
+// ==UserScript==
+// @name         Narrow One Color Customizer by CN clan
+// @namespace    http://tampermonkey.net/
+// @version      1.1
+// @description  Change l'arrière-plan, la couleur du texte et le glow de Narrow One. Menu avec "/" pour personnalisation en direct.
+// @author       RDG KING
+// @match        https://narrow.one/
+// @grant        GM_addStyle
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // Liste de tous les sélecteurs à modifier (version corrigée et simplifiée)
+    const selectors = [
+        '.dialog-button',
+        '.itemsTable',
+        'input.dialog-text-input.blueNight.wrinkledPaper.join-squad-input',
+        '.dialog-select-input',
+        '.shop-skin-preview-canvas',
+        '.main-menu-button',
+        'button.main-menu-corner-profile',
+        'div.avatar',
+        '.menu-buttons-container',
+        '.ownedCoinsContainer',
+        '.shopItem',
+        '.class-selection-image-background',
+        '.chat-container',
+        '.dialog-text-input',
+        '.whiteBigText a',
+        '.health-ui-container',
+        '.health-ui-heart',
+        '.shop-skin-selection-list',
+        '.join-squad-input',
+        '.coin-count-text',
+        '.coin-icon',
+        '.settings-group-header',
+        '.playersListTeam.wrinkledPaper',
+        '.playersListContainer thead',
+        '.chat-log-container',
+        '.flag-score-container',
+        '.elimination-score-container',
+        '.map-item-thumb',
+        '.corner-stats-container',
+        '.dialog-checkbox-input',
+        '.dialog-toggle-input',
+        '.dialog',
+        '.profile-stat',
+        '.linked-accounts > div',
+        '.main-menu-corner-profileprofile:hover',
+        '.class-selection-image-container',
+        '.weaponSelectionDialog',
+        '.class-selection-image-container.in-game > .class-selection-image-background',
+        '.class-selection-image-container.in-game > .class-selection-image',
+        '.squad-players-list',
+        '.dialog-select-wrapper',
+        'input.dialog-range-input[type="range"]',
+        '.dialog-color-input',
+        'input.dialog-range-input[type="range"]',
+        'input.dialog-range-input[type="range"]::-webkit-slider-thumb',
+        '.dialog-checkbox-input',
+        '.dialog-checkbox-input:checked::before',
+        'input::placeholder',
+        '.elimination-score-container',
+        '.flag-score-item:nth-of-type(2) .flag-score-point-el.returned .center-dot:nth-of-type(3)',
+        '.flag-score-item:nth-of-type(1) .flag-score-point-el.returned .center-dot:nth-of-type(3)',
+        '.profile-stat',
+        '.linked-accounts > div',
+        '.main-menu-corner-profileprofile:hover',
+        '.class-selection-image-container',
+        '.class-selection-image-container.in-game > .class-selection-image-background',
+        '.class-selection-image-container.in-game > .class-selection-image'
+    ];
+
+    // Valeurs par défaut
+    let bgColor = localStorage.getItem('narrowOneBgColor') || '#1a1a1a';
+    let textColor = localStorage.getItem('narrowOneTextColor') || '#f1f1f1';
+    let glowColor = localStorage.getItem('narrowOneGlowColor') || '#00ffd9';
+
+    // Ajoute dynamiquement les styles CSS
+    function applyStyles() {
+        let styleStr = '';
+        selectors.forEach(sel => {
+            styleStr += `
+                ${sel} {
+                    background: ${bgColor} !important;
+                    color: ${textColor} !important;
+                    box-shadow: 0 0 10px 2px ${glowColor}77 !important;
+                    text-shadow: 0 0 5px ${glowColor}88 !important;
+                    border-color: ${glowColor} !important;
+                }
+            `;
+        });
+        // Ajustements spéciaux
+        styleStr += `
+            input::placeholder { color: ${textColor}aa !important; }
+        `;
+        // Injection du style
+        if (document.getElementById('narrowone-custom-style')) {
+            document.getElementById('narrowone-custom-style').innerHTML = styleStr;
+        } else {
+            const style = document.createElement('style');
+            style.id = 'narrowone-custom-style';
+            style.innerHTML = styleStr;
+            document.head.appendChild(style);
+        }
+    }
+
+    // Menu de configuration
+    function showConfigMenu() {
+        if (document.getElementById('narrowone-color-menu')) return; // déjà ouvert
+
+        // Overlay
+        const overlay = document.createElement('div');
+        overlay.id = 'narrowone-color-menu';
+        overlay.style = `
+            position: fixed; top:0; left:0; width:100vw; height:100vh;
+            background: rgba(0,0,0,0.7); z-index:99999; display:flex; align-items:center; justify-content:center;
+        `;
+
+        // Fenêtre
+        const window = document.createElement('div');
+        window.style = `
+            background: #222; padding: 32px 24px; border-radius: 18px; box-shadow: 0 0 14px 4px ${glowColor}88;
+            display: flex; flex-direction: column; gap: 18px; min-width: 320px; max-width:90vw;
+        `;
+        window.innerHTML = `
+            <h2 style="color:${glowColor};margin:0 0 18px 0">🎨 Narrow One Color Customization</h2>
+            <label>
+                <span style="color:${textColor};margin-right:8px">Background:</span>
+                <input type="color" id="narrowone-bgcolor" value="${bgColor}">
+            </label>
+            <label>
+                <span style="color:${textColor};margin-right:8px">Text:</span>
+                <input type="color" id="narrowone-textcolor" value="${textColor}">
+            </label>
+            <label>
+                <span style="color:${textColor};margin-right:8px">Glow:</span>
+                <input type="color" id="narrowone-glowcolor" value="${glowColor}">
+            </label>
+            <div style="margin-top:12px;">
+                <button id="narrowone-save" style="margin-right:12px;background:${glowColor};color:#222;font-weight:bold;padding:8px 16px;border:none;border-radius:8px;cursor:pointer">To safeguard</button>
+                <button id="narrowone-cancel" style="background:#444;color:#fff;padding:8px 16px;border:none;border-radius:8px;cursor:pointer">cancel</button>
+            </div>
+        `;
+
+        overlay.appendChild(window);
+        document.body.appendChild(overlay);
+
+        // Fermeture
+        document.getElementById('narrowone-cancel').onclick = () => {
+            overlay.remove();
+        };
+
+        // Sauvegarde
+        document.getElementById('narrowone-save').onclick = () => {
+            bgColor = document.getElementById('narrowone-bgcolor').value;
+            textColor = document.getElementById('narrowone-textcolor').value;
+            glowColor = document.getElementById('narrowone-glowcolor').value;
+            localStorage.setItem('narrowOneBgColor', bgColor);
+            localStorage.setItem('narrowOneTextColor', textColor);
+            localStorage.setItem('narrowOneGlowColor', glowColor);
+            applyStyles();
+            overlay.remove();
+        };
+
+        // Fermer avec Escape
+        overlay.addEventListener('keydown', function(ev){
+            if(ev.key === "Escape") overlay.remove();
+        });
+        window.querySelector('input').focus();
+    }
+
+    // Ouvre le menu avec "/"
+    document.addEventListener('keydown', function(ev) {
+        if (ev.key === '/' && !ev.repeat && !document.activeElement.matches('input,textarea,[contenteditable="true"]')) {
+            ev.preventDefault();
+            showConfigMenu();
+        }
+    });
+
+    // Application initiale
+    applyStyles();
+
+    // Réapplique au cas où la page réagit dynamiquement (ex: SPA)
+    setInterval(applyStyles, 2000);
+})();
