@@ -75,6 +75,8 @@ Open [Narrow One](https://narrow.one/) and reload the web page.
 
 [Riptide (nova_riptide)](https://www.youtube.com/@Riptide.n1/videos)
 
+[𝓡𝓓𝑮 KING (n1rdgking)]((https://www.youtube.com/channel/UC7IlkhriPV7KFP4pCmZo5ig))
+
 CNN (cnn45000)
 
 
