@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         Narrow One Color Customizer by CN clan
+// @name         Narrow One UI Color Customizer by CN clan
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.2
 // @description  Press "/" to use the UI color customizer
-// @author       RDG KING
+// @author       RDG KING & Wurenjun
 // @match        https://narrow.one/
 // @grant        GM_addStyle
 // ==/UserScript==
@@ -11,7 +11,7 @@
 (function() {
     'use strict';
 
-    // Liste de tous les sélecteurs à modifier (version corrigée et simplifiée)
+    // Liste de tous les sélecteurs à modifier
     const selectors = [
         '.dialog-button',
         '.itemsTable',
@@ -20,11 +20,9 @@
         '.shop-skin-preview-canvas',
         '.main-menu-button',
         'button.main-menu-corner-profile',
-        'div.avatar',
         '.menu-buttons-container',
         '.ownedCoinsContainer',
         '.shopItem',
-        '.class-selection-image-background',
         '.chat-container',
         '.dialog-text-input',
         '.whiteBigText a',
@@ -33,12 +31,10 @@
         '.shop-skin-selection-list',
         '.join-squad-input',
         '.coin-count-text',
-        '.coin-icon',
         '.settings-group-header',
         '.playersListTeam.wrinkledPaper',
         '.playersListContainer thead',
         '.chat-log-container',
-        '.flag-score-container',
         '.elimination-score-container',
         '.map-item-thumb',
         '.corner-stats-container',
@@ -48,10 +44,7 @@
         '.profile-stat',
         '.linked-accounts > div',
         '.main-menu-corner-profileprofile:hover',
-        '.class-selection-image-container',
         '.weaponSelectionDialog',
-        '.class-selection-image-container.in-game > .class-selection-image-background',
-        '.class-selection-image-container.in-game > .class-selection-image',
         '.squad-players-list',
         '.dialog-select-wrapper',
         'input.dialog-range-input[type="range"]',
@@ -67,15 +60,14 @@
         '.profile-stat',
         '.linked-accounts > div',
         '.main-menu-corner-profileprofile:hover',
-        '.class-selection-image-container',
-        '.class-selection-image-container.in-game > .class-selection-image-background',
-        '.class-selection-image-container.in-game > .class-selection-image'
+
     ];
 
     // Valeurs par défaut
     let bgColor = localStorage.getItem('narrowOneBgColor') || '#1a1a1a';
     let textColor = localStorage.getItem('narrowOneTextColor') || '#f1f1f1';
     let glowColor = localStorage.getItem('narrowOneGlowColor') || '#00ffd9';
+    let borderRadius = localStorage.getItem('narrowOneBorderRadius') || '25px';
 
     // Ajoute dynamiquement les styles CSS
     function applyStyles() {
@@ -88,12 +80,14 @@
                     box-shadow: 0 0 10px 2px ${glowColor}77 !important;
                     text-shadow: 0 0 5px ${glowColor}88 !important;
                     border-color: ${glowColor} !important;
+                    border-radius: ${borderRadius} !important;
                 }
             `;
         });
         // Ajustements spéciaux
         styleStr += `
             input::placeholder { color: ${textColor}aa !important; }
+            .dialog-checkbox-input { border-radius: ${parseInt(borderRadius) / 2 || 12}px !important; }
         `;
         // Injection du style
         if (document.getElementById('narrowone-custom-style')) {
@@ -106,9 +100,54 @@
         }
     }
 
+    // Show hint message
+    function showHintMessage() {
+        const hint = document.createElement('div');
+        hint.id = 'narrowone-hint-message';
+        hint.style = `
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            z-index: 9999;
+            animation: fadeIn 0.5s ease-in-out;
+        `;
+        hint.textContent = 'Press "/" to enable the customizer';
+        document.body.appendChild(hint);
+
+        // Remove after 5 seconds
+        setTimeout(() => {
+            hint.style.animation = 'fadeOut 0.5s ease-in-out';
+            setTimeout(() => hint.remove(), 500);
+        }, 5000);
+
+        // Add animation styles
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            @keyframes fadeOut {
+                from { opacity: 1; transform: translateY(0); }
+                to { opacity: 0; transform: translateY(10px); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
     // Menu de configuration
     function showConfigMenu() {
         if (document.getElementById('narrowone-color-menu')) return; // déjà ouvert
+
+        // Remove hint if it exists
+        const existingHint = document.getElementById('narrowone-hint-message');
+        if (existingHint) existingHint.remove();
 
         // Overlay
         const overlay = document.createElement('div');
@@ -138,14 +177,26 @@
                 <span style="color:${textColor};margin-right:8px">Glow:</span>
                 <input type="color" id="narrowone-glowcolor" value="${glowColor}">
             </label>
+            <label>
+                <span style="color:${textColor};margin-right:8px">Border Radius:</span>
+                <input type="range" id="narrowone-borderradius" min="0" max="50" value="${parseInt(borderRadius)}">
+                <span id="narrowone-borderradius-value" style="color:${glowColor}">${borderRadius}</span>
+            </label>
             <div style="margin-top:12px;">
-                <button id="narrowone-save" style="margin-right:12px;background:${glowColor};color:#222;font-weight:bold;padding:8px 16px;border:none;border-radius:8px;cursor:pointer">To safeguard</button>
-                <button id="narrowone-cancel" style="background:#444;color:#fff;padding:8px 16px;border:none;border-radius:8px;cursor:pointer">cancel</button>
+                <button id="narrowone-save" style="margin-right:12px;background:${glowColor};color:#222;font-weight:bold;padding:8px 16px;border:none;border-radius:8px;cursor:pointer">Save</button>
+                <button id="narrowone-cancel" style="background:#444;color:#fff;padding:8px 16px;border:none;border-radius:8px;cursor:pointer">Cancel</button>
             </div>
         `;
 
         overlay.appendChild(window);
         document.body.appendChild(overlay);
+
+        // Update border radius value display
+        const radiusSlider = document.getElementById('narrowone-borderradius');
+        const radiusValue = document.getElementById('narrowone-borderradius-value');
+        radiusSlider.addEventListener('input', () => {
+            radiusValue.textContent = `${radiusSlider.value}px`;
+        });
 
         // Fermeture
         document.getElementById('narrowone-cancel').onclick = () => {
@@ -157,9 +208,11 @@
             bgColor = document.getElementById('narrowone-bgcolor').value;
             textColor = document.getElementById('narrowone-textcolor').value;
             glowColor = document.getElementById('narrowone-glowcolor').value;
+            borderRadius = `${document.getElementById('narrowone-borderradius').value}px`;
             localStorage.setItem('narrowOneBgColor', bgColor);
             localStorage.setItem('narrowOneTextColor', textColor);
             localStorage.setItem('narrowOneGlowColor', glowColor);
+            localStorage.setItem('narrowOneBorderRadius', borderRadius);
             applyStyles();
             overlay.remove();
         };
@@ -181,6 +234,7 @@
 
     // Application initiale
     applyStyles();
+    showHintMessage();
 
     // Réapplique au cas où la page réagit dynamiquement (ex: SPA)
     setInterval(applyStyles, 2000);
