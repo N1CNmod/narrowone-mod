@@ -1,0 +1,193 @@
+// ==UserScript==
+// @name         Cyber Punk Ui v3(blue borders)
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  Add a custom "gaming" style to Narrow One for a better gaming atmosphere!
+// @author       Rdg king
+// @match        https://narrow.one/
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=narrow.one
+// @grant        GM_addStyle
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // "Gaming" palette (midnight blue, neon, etc.)
+    const primary = "#181f32";
+    const accent = "#43e0ff";
+    const danger = "#ff1a4b";
+    const success = "#38ff7c";
+    const panel = "#23263b";
+    const glassy = "rgba(32,40,60,0.8)";
+    const border = "#2e7cff";
+    const text = "#d7e5ff";
+    const gold = "#ffe165";
+    const shadow = "0 4px 24px 0 #43e0ff88";
+
+    // Style for all listed elements
+    GM_addStyle(`
+/* Dialogues et boutons */
+.dialog-button, .main-menu-button, button.main-menu-corner-profile {
+  background: linear-gradient(135deg, ${accent} 0%, ${primary} 100%);
+  color: ${text};
+  border: 2px solid ${border};
+  border-radius: 10px;
+  font-weight: bold;
+  box-shadow: ${shadow};
+  transition: 0.2s;
+}
+.dialog-button:hover, .main-menu-button:hover, button.main-menu-corner-profile:hover {
+  background: ${danger};
+  color: #fff;
+}
+
+/* Tables et menus */
+.itemsTable, .menu-buttons-container, .playersListTeam.wrinkledPaper, .playersListContainer thead, .squad-players-list {
+  background: ${glassy};
+  color: ${text};
+  border-radius: 8px;
+  box-shadow: ${shadow};
+  border: 1.5px solid ${accent};
+}
+
+/* Inputs & selects */
+input.dialog-text-input, input.dialog-text-input.blueNight.wrinkledPaper.join-squad-input, .dialog-select-input, .join-squad-input, .dialog-select-wrapper, .dialog-text-input {
+  background-color: ${panel};
+  color: ${text};
+  border: 2px solid ${accent};
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 1em;
+}
+input.dialog-text-input:focus, .dialog-select-input:focus {
+  border-color: ${danger};
+  outline: none;
+}
+
+/* Shop Skins */
+.shop-skin-preview-canvas, .shop-skin-selection-list, .shopItem {
+  background: linear-gradient(120deg, ${panel} 60%, ${primary} 100%);
+  border-radius: 12px;
+  box-shadow: ${shadow};
+  border: 2px solid ${accent};
+}
+
+/* Monnaie et stats */
+.ownedCoinsContainer, .coin-count-text, .corner-stats-container {
+  background: ${primary};
+  color: ${gold};
+  border: 2px solid ${gold};
+  border-radius: 8px;
+  font-weight: bold;
+  box-shadow: 0 0 10px ${gold}44;
+}
+
+/* Chat */
+.chat-container, .chat-log-container {
+  background: ${panel};
+  color: ${accent};
+  border-radius: 8px;
+  border: 1.5px solid ${border};
+  box-shadow: 0 0 8px ${accent}55;
+}
+
+/* Elimination/score/map */
+.elimination-score-container, .map-item-thumb, .flag-score-item:nth-of-type(2) .flag-score-point-el.returned .center-dot:nth-of-type(3),
+.flag-score-item:nth-of-type(1) .flag-score-point-el.returned .center-dot:nth-of-type(3) {
+  background: ${primary};
+  color: ${success};
+  border-radius: 8px;
+  box-shadow: 0 0 10px ${success}55;
+}
+
+/* Health UI */
+.health-ui-container {
+  background: transparent;
+  border-radius: 15px;
+}
+.health-ui-heart {
+  filter: drop-shadow(0 0 10px ${danger}cc);
+}
+
+/* Profile/statistiques */
+.profile-stat, .linked-accounts > div, .main-menu-corner-profileprofile:hover {
+  background: ${panel};
+  color: ${text};
+  border: 2px solid ${accent};
+  border-radius: 10px;
+  box-shadow: 0 0 8px ${accent}33;
+}
+.linked-accounts > div {
+  margin-bottom: 8px;
+}
+
+/* Divers */
+.settings-group-header {
+  color: ${accent};
+  font-weight: bold;
+  font-size: 1.2em;
+}
+.dialog-checkbox-input, .dialog-toggle-input {
+  accent-color: ${accent};
+  border-radius: 5px;
+}
+.dialog-checkbox-input:checked::before {
+  border-color: ${success};
+  background: ${success};
+}
+.dialog-range-input[type="range"], input.dialog-range-input[type="range"] {
+  accent-color: ${accent};
+}
+input.dialog-range-input[type="range"]::-webkit-slider-thumb {
+  background: ${accent};
+  border: 2px solid ${border};
+  box-shadow: 0 0 8px ${accent}88;
+}
+
+/* Color input */
+.dialog-color-input {
+  border: 2px solid ${accent};
+  border-radius: 8px;
+  background: ${panel};
+}
+
+/* Lien */
+.whiteBigText a {
+  color: ${accent} !important;
+  text-shadow: 0 0 8px ${accent}66;
+  font-weight: bold;
+  transition: color 0.2s;
+}
+.whiteBigText a:hover {
+  color: ${danger} !important;
+}
+
+/* Dialogues principaux */
+.dialog, .weaponSelectionDialog {
+  background: ${glassy};
+  border: 2px solid ${accent};
+  border-radius: 16px;
+  box-shadow: ${shadow};
+  color: ${text};
+}
+
+/* Placeholder */
+input::placeholder {
+  color: ${accent};
+  opacity: 0.7;
+  font-style: italic;
+}
+
+/* Petits ajustements */
+* {
+  font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif !important;
+  letter-spacing: 0.5px;
+}
+    `);
+
+    // If you want to add a gaming font (Orbitron, free on Google Fonts):
+    const fontLink = document.createElement('link');
+    fontLink.href = 'https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap';
+    fontLink.rel = 'stylesheet';
+    document.head.appendChild(fontLink);
+})();
