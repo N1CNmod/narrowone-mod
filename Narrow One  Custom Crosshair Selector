@@ -1,0 +1,230 @@
+// ==UserScript==
+// @name         Narrow One  Custom Crosshair Selector
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  Custom Crosshair Selector press "+" for menu
+// @author       RDG KING
+// @match        https://narrow.one/
+// @grant        none
+// ==/UserScript==
+//change color to the ling 19(Simple cross)--33 and 39(Circle)--49(Point)--58(Cross + circle)--74(Hollow cross)--91 and 117(Square corner)
+(function() {
+    'use strict';
+
+    // ---- Configuring the sights ----
+    const crosshairs = [
+        {
+            name: "Simple cross",
+            draw: (ctx, size) => {
+                ctx.strokeStyle = 'red'; //change the color here
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(-size, 0);
+                ctx.lineTo(size, 0);
+                ctx.moveTo(0, -size);
+                ctx.lineTo(0, size);
+                ctx.stroke();
+            }
+        },
+        {
+            name: "Circle",
+            draw: (ctx, size) => {
+                // "Circle
+                ctx.strokeStyle = 'lime'; //change the color here
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(0, 0, size, 0, 2 * Math.PI);
+                ctx.stroke();
+                // Small dot in the center
+                ctx.fillStyle = 'lime';
+                ctx.beginPath();
+                ctx.arc(0, 0, size/6, 0, 2*Math.PI);
+                ctx.fill();
+            }
+        },
+        {
+            name: "Point",
+            draw: (ctx, size) => {
+                // Smallest point
+                ctx.fillStyle = 'yellow'; //change the color here
+                ctx.beginPath();
+                ctx.arc(0, 0, size/6, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+        },
+        {
+            name: "Cross + circle",
+            draw: (ctx, size) => {
+                ctx.strokeStyle = 'cyan'; //change the color here
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(-size, 0);
+                ctx.lineTo(size, 0);
+                ctx.moveTo(0, -size);
+                ctx.lineTo(0, size);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(0, 0, size, 0, 2 * Math.PI);
+                ctx.stroke();
+            }
+        },
+        {
+            name: "Hollow cross",
+            draw: (ctx, size) => {
+                ctx.strokeStyle = 'white'; //change the color here
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(-size, 0);
+                ctx.lineTo(-size/2, 0);
+                ctx.moveTo(size/2, 0);
+                ctx.lineTo(size, 0);
+                ctx.moveTo(0, -size);
+                ctx.lineTo(0, -size/2);
+                ctx.moveTo(0, size/2);
+                ctx.lineTo(0, size);
+                ctx.stroke();
+            }
+        },
+        {
+            name: "Square corner",
+            draw: (ctx, size) => {
+                ctx.strokeStyle = 'black'; //change the color here
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                // top left corner
+                ctx.moveTo(-size, -size);
+                ctx.lineTo(-size/2, -size);
+                ctx.moveTo(-size, -size);
+                ctx.lineTo(-size, -size/2);
+                // top right corner
+                ctx.moveTo(size, -size);
+                ctx.lineTo(size/2, -size);
+                ctx.moveTo(size, -size);
+                ctx.lineTo(size, -size/2);
+                // lower left corner
+                ctx.moveTo(-size, size);
+                ctx.lineTo(-size/2, size);
+                ctx.moveTo(-size, size);
+                ctx.lineTo(-size, size/2);
+                // lower right corner
+                ctx.moveTo(size, size);
+                ctx.lineTo(size/2, size);
+                ctx.moveTo(size, size);
+                ctx.lineTo(size, size/2);
+                ctx.stroke();
+
+                // Small x in the center
+                ctx.strokeStyle = 'blue'; //change the color here
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(-size/4, -size/4);
+                ctx.lineTo(size/4, size/4);
+                ctx.moveTo(-size/4, size/4);
+                ctx.lineTo(size/4, -size/4);
+                ctx.stroke();
+            }
+        },
+    ];
+
+    // ---- State variables ----
+    let currentCrosshair = Number(localStorage.getItem("narrowone_crosshair_index") || 0);
+    let menuOpen = false;
+
+    // ---- Ccreating the canvas for the viewfinder ----
+    const crosshairSize = 22; // px, main viewfinder size
+    const canvas = document.createElement('canvas');
+    canvas.width = crosshairSize*2+8;
+    canvas.height = crosshairSize*2+8;
+    canvas.style.position = 'fixed';
+    canvas.style.left = '50%';
+    canvas.style.top = '50%';
+    canvas.style.transform = 'translate(-50%, -50%)';
+    canvas.style.zIndex = '99999';
+    canvas.style.pointerEvents = 'none';
+    canvas.style.display = 'block';
+    document.body.appendChild(canvas);
+
+    // ---- Viewfinder drawing function ----
+    function drawCrosshair() {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (menuOpen) return;
+
+        ctx.save();
+        ctx.translate(canvas.width/2, canvas.height/2);
+        crosshairs[currentCrosshair].draw(ctx, crosshairSize);
+        ctx.restore();
+    }
+
+    // ---- Mini selection window ----
+    const menu = document.createElement('div');
+    menu.style.position = 'fixed';
+    menu.style.top = '70%';
+    menu.style.left = '50%';
+    menu.style.transform = 'translate(-50%, -50%)';
+    menu.style.background = 'rgba(30,30,30,0.97)';
+    menu.style.padding = '18px 30px 25px 30px';
+    menu.style.borderRadius = '15px';
+    menu.style.border = '2px solid #aaa';
+    menu.style.boxShadow = '0 6px 32px #000a';
+    menu.style.zIndex = '100000';
+    menu.style.color = '#fff';
+    menu.style.display = 'none';
+    menu.style.fontFamily = 'Arial,sans-serif';
+    menu.style.textAlign = 'left';
+
+    function updateMenu() {
+        let html = '<h3 style="margin-top:0;text-align:center;">Choosing a crosshair</h3><ul style="padding-left:0;margin-bottom:18px;">';
+        crosshairs.forEach((c, i) => {
+            html += `<li style="list-style:none;margin:10px 0;">
+                <button style="font-size:16px;padding:6px 16px;border-radius:8px;${i === currentCrosshair ? 'background:#48f;color:#fff;' : ''}" data-id="${i}">
+                    ${i+1}. ${c.name}
+                </button>
+            </li>`;
+        });
+        html += "</ul>";
+        html += `<div style="text-align:center;margin-top:10px;">
+                    <button id="close-crosshair-menu" style="background:#333;color:#fff;border-radius:8px;padding:8px 24px;font-size:17px;border:1px solid #48f;cursor:pointer;">close</button>
+                </div>`;
+        menu.innerHTML = html;
+    }
+    document.body.appendChild(menu);
+
+    // ---- Menu click management ----
+    menu.addEventListener('click', function(e) {
+        if (e.target.tagName === "BUTTON" && e.target.dataset.id) {
+            currentCrosshair = Number(e.target.dataset.id);
+            localStorage.setItem("narrowone_crosshair_index", currentCrosshair);
+            updateMenu();
+            drawCrosshair();
+        }
+        if (e.target.id === "close-crosshair-menu") {
+            menuOpen = false;
+            menu.style.display = 'none';
+            drawCrosshair();
+        }
+    });
+
+    // ---- Hotkey to open/close the menu ----
+    window.addEventListener('keydown', function(e) {
+        if (
+            (e.key === '+' || e.key === '=' || e.code === 'NumpadAdd') &&
+            ['INPUT','TEXTAREA'].indexOf(document.activeElement.tagName) === -1
+        ) {
+            menuOpen = !menuOpen;
+            menu.style.display = menuOpen ? 'block' : 'none';
+            drawCrosshair();
+            if (menuOpen) updateMenu();
+            e.preventDefault();
+        }
+    });
+
+    // ---- Loop rendering ----
+    function renderLoop() {
+        drawCrosshair();
+        requestAnimationFrame(renderLoop);
+    }
+    renderLoop();
+
+})();
