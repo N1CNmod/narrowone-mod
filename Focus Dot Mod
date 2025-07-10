@@ -1,0 +1,34 @@
+// ==UserScript==
+// @name         Focus Dot Mod for Narrow.One
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  Show a small dot in the center of screen with background-inverted color
+// @author       wolfart
+// @match        https://narrow.one/
+// @grant        none
+// ==/UserScript==
+
+(function () {
+    'use strict';
+
+    // フォーカスドットを作成
+    const dot = document.createElement("div");
+    dot.id = "focus-dot";
+    document.body.appendChild(dot);
+
+    // CSSスタイル
+    Object.assign(dot.style, {
+        position: "fixed",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        width: "8px",
+        height: "8px",
+        borderRadius: "50%",
+        zIndex: "9999",
+        pointerEvents: "none",
+        mixBlendMode: "difference", // 反転色効果のポイント！
+        backgroundColor: "white",   // 白＋difference = 背景の反対色に見える
+    });
+    // dot.style.boxShadow = "0 0 4px white";
+})();
