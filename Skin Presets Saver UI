@@ -129,7 +129,7 @@
               Import Presets
             </button><br><br>
 
-            <small>N1 | CN</small>
+            <small>Made by N1CN clan</small>
         `;
 
         document.body.appendChild(menu);
