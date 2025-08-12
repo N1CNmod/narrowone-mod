@@ -1,0 +1,158 @@
+// ==UserScript==
+// @name         Narrow.One - Additional weather + Thunder
+// @namespace    http://tampermonkey.net/
+// @version      1.1
+// @description  Adds rain, snow, and thunder effects to Narrow.One with a floating UI to toggle weather modes dynamically.
+// @author       CNN
+// @match        https://*.narrow.one/*
+// @grant        none
+// ==/UserScript==
+
+(function () {
+    'use strict';
+
+    // === Canvas Setup ===
+    const weatherCanvas = document.createElement('canvas');
+    weatherCanvas.style.position = 'absolute';
+    weatherCanvas.style.pointerEvents = 'none';
+    weatherCanvas.style.top = '0';
+    weatherCanvas.style.left = '0';
+    weatherCanvas.style.zIndex = '9999';
+    weatherCanvas.width = window.innerWidth;
+    weatherCanvas.height = window.innerHeight;
+    document.body.appendChild(weatherCanvas);
+    const ctx = weatherCanvas.getContext('2d');
+
+    window.addEventListener('resize', () => {
+        weatherCanvas.width = window.innerWidth;
+        weatherCanvas.height = window.innerHeight;
+    });
+
+    // === Weather Particles ===
+    let mode = 'none';
+    const particles = [];
+
+    function createParticles(type) {
+        particles.length = 0;
+        for (let i = 0; i < 200; i++) {
+            particles.push({
+                x: Math.random() * weatherCanvas.width,
+                y: Math.random() * weatherCanvas.height,
+                speedY: type === 'rain' ? 8 + Math.random() * 5 : 1 + Math.random() * 2,
+                speedX: type === 'rain' ? -1 + Math.random() * 2 : -0.5 + Math.random(),
+                size: type === 'rain' ? 2 + Math.random() * 2 : 2 + Math.random() * 3,
+                type
+            });
+        }
+    }
+
+    function drawParticles() {
+        ctx.clearRect(0, 0, weatherCanvas.width, weatherCanvas.height);
+        for (let p of particles) {
+            ctx.beginPath();
+            if (p.type === 'rain') {
+                ctx.strokeStyle = 'rgba(180,180,255,0.5)';
+                ctx.lineWidth = 1;
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p.x + p.speedX * 2, p.y + p.speedY * 2);
+                ctx.stroke();
+            } else if (p.type === 'snow') {
+                ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            p.x += p.speedX;
+            p.y += p.speedY;
+
+            if (p.y > weatherCanvas.height || p.x > weatherCanvas.width || p.x < 0) {
+                p.x = Math.random() * weatherCanvas.width;
+                p.y = -10;
+            }
+        }
+    }
+
+    function animate() {
+        if (mode !== 'none') drawParticles();
+        requestAnimationFrame(animate);
+    }
+
+    animate();
+
+    // === Thunder Effect ===
+    let thunderEnabled = true;
+
+    function flashThunder() {
+        if (!thunderEnabled || mode !== 'rain') return;
+
+        const flash = document.createElement('div');
+        flash.style.position = 'absolute';
+        flash.style.top = '0';
+        flash.style.left = '0';
+        flash.style.width = '100vw';
+        flash.style.height = '100vh';
+        flash.style.backgroundColor = 'white';
+        flash.style.opacity = '0.8';
+        flash.style.zIndex = '99998';
+        flash.style.pointerEvents = 'none';
+        document.body.appendChild(flash);
+
+        setTimeout(() => {
+            flash.style.transition = 'opacity 0.3s';
+            flash.style.opacity = '0';
+            setTimeout(() => flash.remove(), 500);
+        }, 50);
+
+    }
+
+    function thunderLoop() {
+        if (mode === 'rain' && thunderEnabled) {
+            const delay = 5000 + Math.random() * 10000; // 5–15s
+            setTimeout(() => {
+                flashThunder();
+                thunderLoop();
+            }, delay);
+        } else {
+            setTimeout(thunderLoop, 5000); // Check again in 5s
+        }
+    }
+
+    thunderLoop();
+
+    // === UI Control Panel ===
+    const controlPanel = document.createElement('div');
+    controlPanel.style.position = 'absolute';
+    controlPanel.style.top = '20px';
+    controlPanel.style.right = '20px';
+    controlPanel.style.zIndex = '99999';
+    controlPanel.style.background = 'rgba(0,0,0,0.6)';
+    controlPanel.style.color = 'white';
+    controlPanel.style.padding = '10px';
+    controlPanel.style.borderRadius = '8px';
+    controlPanel.style.fontFamily = 'Arial';
+    controlPanel.style.fontSize = '14px';
+    controlPanel.innerHTML = `
+        <div><b>🌦️ Weather FX</b></div>
+        <button id="rainBtn">🌧️ Rain</button>
+        <button id="snowBtn">❄️ Snow</button>
+        <button id="clearBtn">☀️ Clear</button>
+        <button id="thunderToggle">⚡ Thunder: ON</button>
+    `;
+    document.body.appendChild(controlPanel);
+
+    document.getElementById('rainBtn').onclick = () => {
+        mode = 'rain';
+        createParticles('rain');
+    };
+    document.getElementById('snowBtn').onclick = () => {
+        mode = 'snow';
+        createParticles('snow');
+    };
+    document.getElementById('clearBtn').onclick = () => {
+        mode = 'none';
+        ctx.clearRect(0, 0, weatherCanvas.width, weatherCanvas.height);
+    };
+    document.getElementById('thunderToggle').onclick = () => {
+        thunderEnabled = !thunderEnabled;
+        document.getElementById('thunderToggle').innerText = `⚡ Thunder: ${thunderEnabled ? 'ON' : 'OFF'}`;
+    };
+})();
