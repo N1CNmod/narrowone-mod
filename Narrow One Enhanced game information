@@ -1,0 +1,171 @@
+// ==UserScript==
+// @name         Narrow One Enhanced game information
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  Displays FPS, timer, health % (.health-ui-bar.clip), and player count (.playersListContainer) on Narrow One. Click to choose what you want to display.
+// @author       N1-rdgking
+// @match        https://narrow.one/
+// @grant        none
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // --- UI State ---
+    let showFPS = true;
+    let showTimer = true;
+    let showHealth = true;
+    let showPlayers = true;
+
+    // --- Create HUD Container ---
+    const hud = document.createElement('div');
+    hud.style.position = 'fixed';
+    hud.style.top = '820px';
+    hud.style.right = '975px';
+    hud.style.zIndex = '99999';
+    hud.style.background = 'rgba(0,0,0,0.5)';
+    hud.style.color = '#fff';
+    hud.style.padding = '12px 16px';
+    hud.style.borderRadius = '8px';
+    hud.style.fontFamily = 'monospace';
+    hud.style.fontSize = '16px';
+    hud.style.userSelect = 'none';
+    hud.style.cursor = 'pointer';
+    hud.style.transition = 'opacity 0.2s';
+    hud.style.boxShadow = '0 2px 8px #0006';
+    hud.title = "Cliquez pour configurer l'affichage";
+    document.body.appendChild(hud);
+
+    // --- FPS Calculation ---
+    let lastFrame = performance.now();
+    let frameCount = 0;
+    let fps = 0;
+    function step() {
+        frameCount++;
+        const now = performance.now();
+        if (now - lastFrame >= 1000) {
+            fps = frameCount;
+            frameCount = 0;
+            lastFrame = now;
+        }
+        requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+
+    // --- Chronometer ---
+    const startTime = Date.now();
+    function formatTime(ms) {
+        const s = Math.floor(ms / 1000);
+        const m = Math.floor(s / 60);
+        const h = Math.floor(m / 60);
+        return (
+            (h ? (h < 10 ? '0' : '') + h + ':' : '') +
+            (m % 60 < 10 ? '0' : '') + (m % 60) + ':' +
+            (s % 60 < 10 ? '0' : '') + (s % 60)
+        );
+    }
+
+    // --- Get Health ---
+    function getHealthPercent() {
+        const bar = document.querySelector('.health-ui-bar.clip, .health-ui-bar.clip *');
+        if (!bar) return null;
+        let width = bar.style.width;
+        if (width && width.endsWith('%')) {
+            return parseFloat(width);
+        }
+        const computed = window.getComputedStyle(bar);
+        if (computed.width && computed.maxWidth && computed.maxWidth !== 'none') {
+            return 100 * parseFloat(computed.width) / parseFloat(computed.maxWidth);
+        }
+        if (bar.parentElement) {
+            const w = parseFloat(window.getComputedStyle(bar).width);
+            const pw = parseFloat(window.getComputedStyle(bar.parentElement).width);
+            if (pw) return Math.round(100 * w / pw);
+        }
+        return null;
+    }
+
+    // --- Get Players Count ---
+    function getPlayersCount() {
+        const container = document.querySelector('.playersListContainer');
+        if (!container) return null;
+        const players = container.querySelectorAll('.player, .player-item, .playersListItem');
+        if (players.length > 0) return players.length;
+        return container.children.length;
+    }
+
+    // --- Config Window ---
+    let configDiv = null;
+    function showConfig() {
+        // Prevent multiple windows
+        if (configDiv) return;
+        configDiv = document.createElement('div');
+        configDiv.style.position = 'fixed';
+        configDiv.style.top = '50%';
+        configDiv.style.left = '50%';
+        configDiv.style.transform = 'translate(-50%, -50%)';
+        configDiv.style.background = '#222';
+        configDiv.style.color = '#fff';
+        configDiv.style.padding = '24px 32px';
+        configDiv.style.borderRadius = '10px';
+        configDiv.style.boxShadow = '0 4px 32px #000a';
+        configDiv.style.zIndex = '100000';
+        configDiv.innerHTML = `
+            <h3 style="margin:0 0 12px">Choose what you want to have </h3>
+            <label><input type="checkbox" id="chkFPS" ${showFPS ? 'checked' : ''}> FPS</label><br>
+            <label><input type="checkbox" id="chkTimer" ${showTimer ? 'checked' : ''}> Chronomèter</label><br>
+            <label><input type="checkbox" id="chkHealth" ${showHealth ? 'checked' : ''}> Health (%)</label><br>
+            <label><input type="checkbox" id="chkPlayers" ${showPlayers ? 'checked' : ''}> Player</label><br>
+            <button id="btnCloseHudConfig" style="margin-top:16px;padding:6px 18px;border-radius:6px;border:0;background:#444;color:#fff;cursor:pointer">Close</button>
+        `;
+        document.body.appendChild(configDiv);
+
+        // Stop propagation to avoid closing instantly
+        configDiv.addEventListener('click', function(e) { e.stopPropagation(); });
+
+        document.getElementById('chkFPS').onchange = e => { showFPS = e.target.checked; };
+        document.getElementById('chkTimer').onchange = e => { showTimer = e.target.checked; };
+        document.getElementById('chkHealth').onchange = e => { showHealth = e.target.checked; };
+        document.getElementById('chkPlayers').onchange = e => { showPlayers = e.target.checked; };
+        document.getElementById('btnCloseHudConfig').onclick = () => {
+            if (configDiv) { configDiv.remove(); configDiv = null; }
+        };
+
+        // Fermer la config si on clique ailleurs
+        setTimeout(() => {
+            document.addEventListener('click', closeConfigOnClickOutside);
+        }, 100);
+    }
+    function closeConfigOnClickOutside(e) {
+        if (configDiv && !configDiv.contains(e.target) && e.target !== hud) {
+            configDiv.remove();
+            configDiv = null;
+            document.removeEventListener('click', closeConfigOnClickOutside);
+        }
+    }
+
+    // --- HUD Click Event ---
+    hud.addEventListener('click', function(e) {
+        e.stopPropagation();
+        showConfig();
+    });
+
+    // --- Update HUD ---
+    setInterval(function() {
+        let lines = [];
+        if (showFPS) lines.push(`FPS: <b>${fps}</b>`);
+        if (showTimer) lines.push(`Chronomèter ${formatTime(Date.now() - startTime)}`);
+        if (showHealth) {
+            const hp = getHealthPercent();
+            if (hp !== null) lines.push(`Health: <b>${Math.round(hp)}%</b>`);
+            else lines.push(`Health: <i>?</i>`);
+        }
+        if (showPlayers) {
+            const p = getPlayersCount();
+            if (p !== null) lines.push(`Player: <b>${p}</b>`);
+            else lines.push(`Player: <i>?</i>`);
+        }
+        hud.innerHTML = lines.join('<br>');
+    }, 200);
+
+})();
