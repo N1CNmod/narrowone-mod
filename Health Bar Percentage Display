@@ -7,8 +7,6 @@
 // @run-at       document-start
 // @match        https://narrow.one/
 // @icon         https://www.svgrepo.com/show/404891/broken-heart.svg
-// @downloadURL  https://raw.githubusercontent.com/TheGirlThatLived/NarrowOne_Customizations/refs/heads/main/Scripts/HealthBarPercentage.js
-// @updateURL    https://raw.githubusercontent.com/TheGirlThatLived/NarrowOne_Customizations/refs/heads/main/Scripts/HealthBarPercentage.js
 // @grant        none
 // ==/UserScript==
 
