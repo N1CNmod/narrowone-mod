@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Narrow One Enhanced game information
+// @name         Enhanced Additional game information
 // @namespace    http://tampermonkey.net/
 // @version      1.0
 // @description  Displays FPS, timer, health % (.health-ui-bar.clip), and player count (.playersListContainer) on Narrow One. Click to choose what you want to display.
