@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Narrow.One 1v1 Match Card + Triggered Intro Banner
+// @name         1v1 Match Card + Triggered Intro Banner
 // @namespace    http://tampermonkey.net/
 // @version      1.4
 // @description  Shows 1v1 styled match card with manual intro banner trigger (press +), names, avatars, and animated kill updates for recordings
