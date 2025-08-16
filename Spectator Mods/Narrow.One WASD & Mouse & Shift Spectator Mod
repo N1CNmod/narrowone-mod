@@ -1,0 +1,218 @@
+// ==UserScript==
+// @name         Narrow.One WASD & Mouse & Shift Spectator Mod
+// @namespace    http://tampermonkey.net/
+// @version      1.1
+// @description  Spectator camera for narrow.one using WASD and mouse
+// @author       intdgy & Riptide
+// @match        https://narrow.one/*
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=narrow.one
+// @grant        unsafeWindow
+// @run-at       document-start
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    const DEBUG = false;
+    function log(...args) { DEBUG && console.log("[Spectator]", ...args); }
+
+    let spectatorMode = false;
+    let camPos = null;
+    let camRot = { x: 0, y: 0 };
+    let origCamPos = null;
+    let origViewMatrix = null;
+    let needsPointerLock = false;
+
+    const MOVE_SPEED = 0.2;
+    const ROT_SPEED = 0.002;
+    const KEYS = { w: false, a: false, s: false, d: false, e: false, ' ': false, shift: false };
+
+    const uniformInfo = new Map();
+
+    function degToRad(d) { return d * Math.PI / 180; }
+    function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
+    function addVec3(a, b) { return [a[0]+b[0], a[1]+b[1], a[2]+b[2]]; }
+    function scaleVec3(v, s) { return [v[0]*s, v[1]*s, v[2]*s]; }
+    function cross(a, b) {
+        return [
+            a[1]*b[2] - a[2]*b[1],
+            a[2]*b[0] - a[0]*b[2],
+            a[0]*b[1] - a[1]*b[0]
+        ];
+    }
+    function normalize(v) {
+        const l = Math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+        return l ? [v[0]/l, v[1]/l, v[2]/l] : [0,0,0];
+    }
+    function lookDir(rotX, rotY) {
+        return [
+            Math.sin(rotY) * Math.cos(rotX),
+            -Math.sin(rotX),
+            Math.cos(rotY) * Math.cos(rotX)
+        ];
+    }
+    function lookAt(eye, target, up) {
+        const z = normalize([target[0] - eye[0], target[1] - eye[1], target[2] - eye[2]]);
+        const x = normalize(cross(up, z));
+        const y = cross(z, x);
+        return new Float32Array([
+            x[0], y[0], z[0], 0,
+            x[1], y[1], z[1], 0,
+            x[2], y[2], z[2], 0,
+            -dot(x, eye), -dot(y, eye), -dot(z, eye), 1
+        ]);
+    }
+    function dot(a, b) { return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]; }
+
+    function requestPointerLock() {
+        const c = document.body;
+        if (c.requestPointerLock) c.requestPointerLock();
+    }
+    function exitPointerLock() {
+        if (document.exitPointerLock) document.exitPointerLock();
+    }
+
+    function showMsg(msg, timeout=1500) {
+        let el = document.getElementById('_spectatorMsg');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = '_spectatorMsg';
+            el.style = `
+                position:fixed;top:30px;left:50%;transform:translateX(-50%);
+                background:rgba(0,0,0,0.8);color:#fff;padding:10px 18px;
+                border-radius:8px;z-index:99999;font-family:sans-serif;font-size:18px;
+                pointer-events:none;transition:opacity .3s;opacity:1;
+            `;
+            document.body.appendChild(el);
+        }
+        el.textContent = msg;
+        el.style.opacity = 1;
+        clearTimeout(el._hideTimer);
+        el._hideTimer = setTimeout(()=>{el.style.opacity=0;}, timeout);
+    }
+
+    function handleKey(e, down) {
+        if (!spectatorMode) return;
+        const key = e.key.toLowerCase();
+        if (key in KEYS) {
+            KEYS[key] = down;
+            e.preventDefault();
+        } else if (key === 'shift') {
+            KEYS['shift'] = down;
+        }
+    }
+    function handleMouseMove(e) {
+        if (!spectatorMode || document.pointerLockElement !== document.body) return;
+        camRot.y -= e.movementX * ROT_SPEED;
+        camRot.x -= e.movementY * ROT_SPEED;
+        camRot.x = clamp(camRot.x, -Math.PI/2.1, Math.PI/2.1);
+    }
+    function stepCamera() {
+        if (!spectatorMode || !camPos) return;
+        let move = [0,0,0];
+        const front = lookDir(camRot.x, camRot.y);
+        const right = normalize(cross(front, [0,1,0]));
+        const up = [0,1,0];
+        let speed = MOVE_SPEED;
+
+        if (KEYS.w) move = addVec3(move, scaleVec3(front, -speed));
+        if (KEYS.s) move = addVec3(move, scaleVec3(front, speed));
+        if (KEYS.a) move = addVec3(move, scaleVec3(right, speed));
+        if (KEYS.d) move = addVec3(move, scaleVec3(right, -speed));
+        if (KEYS[' ']) move = addVec3(move, scaleVec3(up, speed));
+        if (KEYS.shift) move = addVec3(move, scaleVec3(up, -speed));
+
+        camPos = addVec3(camPos, move);
+        requestAnimationFrame(stepCamera);
+    }
+
+
+
+function enableSpectator() {
+    if (!origCamPos) {
+        showMsg("Wait for game to load before enabling Spectator Mod", 2000);
+        return;
+    }
+    window.spectatorMode = true;
+    spectatorMode = true;
+    camPos = [...origCamPos];
+    camRot = { x: 0, y: 0 };
+    showMsg("Spectator Mode ON (WASD+Mouse)", 2000);
+    needsPointerLock = true;
+    requestPointerLock();
+    requestAnimationFrame(stepCamera);
+}
+    function disableSpectator() {
+        window.spectatorMode = false;
+        spectatorMode = false;
+        KEYS.w = KEYS.a = KEYS.s = KEYS.d = KEYS.q = KEYS[' '] = KEYS['shift'] = false;
+        showMsg("Spectator Mode OFF", 1300);
+        exitPointerLock();
+    }
+
+    function handleGetUniformLocation(ctx) {
+        const orig = ctx.getUniformLocation;
+        return function(program, name) {
+            const loc = orig.apply(this, arguments);
+            if (loc) uniformInfo.set(loc, { name });
+            return loc;
+        };
+    }
+    function handleUniformMatrix4fv(ctx) {
+        const orig = ctx.uniformMatrix4fv;
+        return function(location, transpose, value) {
+            const info = uniformInfo.get(location);
+            if (info && info.name === 'viewMatrix') {
+                if (!origViewMatrix) {
+                    origViewMatrix = Array.from(value);
+                    origCamPos = [-value[12], -value[13], -value[14]];
+                }
+                if (spectatorMode && camPos) {
+                    const front = lookDir(camRot.x, camRot.y);
+                    const target = addVec3(camPos, front);
+                    return orig.call(this, location, transpose, lookAt(camPos, target, [0,1,0]));
+                }
+            }
+            return orig.apply(this, arguments);
+        };
+    }
+
+    function hookWebGL() {
+        const origGetContext = HTMLCanvasElement.prototype.getContext;
+        HTMLCanvasElement.prototype.getContext = function() {
+            const ctx = origGetContext.apply(this, arguments);
+            if ((arguments[0] === 'webgl' || arguments[0] === 'webgl2') && !ctx._spectatorHooked) {
+                ctx.getUniformLocation = handleGetUniformLocation(ctx);
+                ctx.uniformMatrix4fv = handleUniformMatrix4fv(ctx);
+                ctx._spectatorHooked = true;
+            }
+            return ctx;
+        };
+    }
+
+    function initialize() {
+        hookWebGL();
+
+        window.addEventListener('keydown', e => {
+            if (e.code === "ShiftRight" && !spectatorMode) {
+                enableSpectator();
+            } else if (e.code === "ShiftRight" && spectatorMode) {
+                disableSpectator();
+            } else {
+                handleKey(e, true);
+            }
+        });
+        window.addEventListener('keyup', e => handleKey(e, false));
+        window.addEventListener('mousemove', handleMouseMove);
+
+        document.addEventListener('pointerlockchange', () => {
+            if (spectatorMode && document.pointerLockElement !== document.body) {
+                disableSpectator();
+            }
+        });
+
+        setTimeout(() => showMsg("Press Right Shift for Spectator Mode", 2500), 1200);
+    }
+
+    initialize();
+})();
