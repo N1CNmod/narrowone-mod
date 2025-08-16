@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Narrow.One Replay Recorder with Start/Stop/Auto-Filename
+// @name         Replay Recorder with Start/Stop/Auto-Filename
 // @namespace    https://narrow.one/
 // @version      2.0
 // @description  Record last 60s in Narrow.One. Press R to start, H to save.
