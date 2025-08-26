@@ -1,0 +1,103 @@
+// ==UserScript==
+// @name         Custom Color Picker for App Bar
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  Pick or import hex to change app bar color
+// @author       Parrol
+// @match        *://narrow.one/*
+// @grant        GM_addStyle
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    GM_addStyle(`
+        #colorMenu {
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: transparent;
+            border-radius: 10px;
+            padding: 20px;
+            z-index: 99999;
+            display: none;
+            text-align: center;
+            font-family: sans-serif;
+            width: 300px;
+            backdrop-filter: blur(15px);
+        }
+        #openMenuBtn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: transparent;
+             backdrop-filter: blur(15px);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            z-index: 99999;
+        }
+        #closeMenu {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            color: red;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        #colorInput, #hexInput {
+            margin: 10px 0;
+        }
+        #hexInput {
+            padding: 5px;
+            width: 80%;
+            text-align: center;
+        }
+    `);
+
+    const btn = document.createElement("div");
+    btn.id = "openMenuBtn";
+    btn.innerText = "Change";
+    document.body.appendChild(btn);
+
+    const menu = document.createElement("div");
+    menu.id = "colorMenu";
+    menu.innerHTML = `
+        <div id="closeMenu">✖</div>
+        <h3>Select color</h3>
+        <input type="color" id="colorInput"><br>
+        <p>or</p>
+        <p><b>Import HEX</b></p>
+        <input type="text" id="hexInput" placeholder="#RRGGBB">
+    `;
+    document.body.appendChild(menu);
+
+    function setAppColor(color) {
+        let metaTheme = document.querySelector('meta[name="theme-color"]');
+        if (!metaTheme) {
+            metaTheme = document.createElement('meta');
+            metaTheme.name = "theme-color";
+            document.head.appendChild(metaTheme);
+        }
+        metaTheme.content = color;
+
+        document.documentElement.style.border = `5px solid ${color}`;
+    }
+
+    // Event
+    btn.onclick = () => menu.style.display = "block";
+    document.getElementById("closeMenu").onclick = () => menu.style.display = "none";
+
+    document.getElementById("colorInput").oninput = (e) => setAppColor(e.target.value);
+    document.getElementById("hexInput").onchange = (e) => {
+        const val = e.target.value;
+        if (/^#([0-9A-F]{3}){1,2}$/i.test(val)) {
+            setAppColor(val);
+        } else {
+            alert("ur hex is WRONG, PLS TRY AGAIN");
+        }
+    };
+})();
