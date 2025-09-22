@@ -27,7 +27,7 @@ Color Theme Converter: Allow users to change the colors to it's opposite in the 
 
 Hair Color Modifier: Allow users to Modify their hair color easily
 
-// No Physics Changes: This mod does not alter any game physics, ensuring a consistent gaming experience.
+No Physics Changes: This mod does not alter any game physics, ensuring a consistent gaming experience.
 
 # No obfuscation 
 
