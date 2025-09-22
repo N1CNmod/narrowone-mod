@@ -2,12 +2,12 @@
 This is a group of cool mods for narrow.one including lots of features. They are all made by N1CN members. We encourage everyone to use these mods in gameplays.
 
 # Overview
-Welcome to the N1CN Mod. This mod is designed for Narrowone (especially N1CN) players. We hope everyone can manage to get a cool mods made by us. 
+Welcome to the N1CN Mod. This mod is designed for all Narrowone players. We hope everyone can manage to get a cool mods made by us. 
 
 # What do the mods do
 Custom User Interface: This mod provides a Custom User Interface with Chinese new year theme. (Partially borrowed from T7)
 
-Free Camera: Provides Advanced Camra Controls for players to spectate a match.
+Free Camera Spectating: Provides Advanced Camra Controls for players to spectate a match.
 
 Image substitution: The icon for flags and players will be changed. (Partially borrowed from T7)
 
@@ -15,13 +15,19 @@ Sky Colour Change: Allow users to customize their sky colour.
 
 Dark World Ui: Make the entire world change into the dark theme.
 
-Foucs Mod: Allow users to Zoom in/out in the Game.
+Focus Mod: Allow users to Zoom in/out in the Game.
 
 Rainbow Arrow: Force rainbow arrow trail effect permanently
-
+ 
 Health Bar Percentage Display: Display a text percentage of current HP bar state (improved from Xeltalliv's version)
 
-No Physics Changes: This mod does not alter any game physics, ensuring a consistent gaming experience.
+Weather Switching: Allow users to add some cool weather effect on your screen
+
+Color Theme Converter: Allow users to change the colors to it's opposite in the color cycle
+
+Hair Color Modifier: Allow users to Modify their hair color easily
+
+// No Physics Changes: This mod does not alter any game physics, ensuring a consistent gaming experience.
 
 # No obfuscation 
 
@@ -97,7 +103,7 @@ Beginner coding: [code.org](https://code.org/)
 
 Image uploading website: https://imgbb.com/                
 
-Avalible ai tool(might help): https://chat.deepseek.com/
+Avalible free ai tools(might help):  [DeepSeek]([https://chat.deepseek.com/]) and [Kimi]([https://www.kimi.com/])
 
 For deobfuscators: https://deobfuscate.io/ 
 
