@@ -1,0 +1,105 @@
+// ==UserScript==
+// @name         Narrow.One Crosshair + and Centered Fast Bar
+// @version      3.0
+// @description  + Crosshair and bar which fills when LMB
+// @author       abcde
+// @match        *://narrow.one/*
+// @grant        none
+// ==/UserScript==
+
+(function () {
+    'use strict';
+
+    const barWidth = 28;
+    const barHeight = 4;
+    const crossLength = 30;
+    const crossThick = 4;
+
+// === CROSSHAIR VERTICAL LINE ===
+const vertical = document.createElement('div');
+Object.assign(vertical.style, {
+    position: 'fixed',
+    width: `${crossThick}px`,
+    height: `${crossLength}px`,
+    background: 'rgba(255, 255, 255, 0.8)', // transparent white
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    zIndex: 9999,
+    pointerEvents: 'none',
+    borderRadius: '0px'
+});
+
+// === CROSSHAIR HORIZONTAL LINE ===
+const horizontal = document.createElement('div');
+Object.assign(horizontal.style, {
+    position: 'fixed',
+    width: `${crossLength}px`,
+    height: `${crossThick}px`,
+    background: 'rgba(255, 255, 255, 0.8)', // transparent white
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    zIndex: 9999,
+    pointerEvents: 'none',
+    borderRadius: '0px'
+});
+
+document.body.appendChild(vertical);
+document.body.appendChild(horizontal);
+
+
+    // === BAR CONTAINER (JUST BELOW CROSSHAIR) ===
+    const barContainer = document.createElement('div');
+    Object.assign(barContainer.style, {
+        position: 'fixed',
+        width: `${barWidth}px`,
+        height: `${barHeight}px`,
+        background: 'rgba(255, 255, 255, 0.2)',
+        top: 'calc(50% + 35px)',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        border: '1px solid white',
+        zIndex: 9999,
+        pointerEvents: 'none',
+        borderRadius: '0px',
+        overflow: 'hidden'
+    });
+
+    const bar = document.createElement('div');
+    Object.assign(bar.style, {
+        width: '0%',
+        height: '100%',
+        background: 'white',
+        transition: 'width 0.2s linear'
+    });
+
+    barContainer.appendChild(bar);
+    document.body.appendChild(barContainer);
+
+    // === CHARGING MECHANIC ===
+    let charging = false;
+    let chargeStartTime = 0;
+    const fullChargeTime = 750;
+    const updateBar = () => {
+        if (charging) {
+            const now = performance.now();
+            const elapsed = now - chargeStartTime;
+            const percent = Math.min((elapsed / fullChargeTime) * 100, 100);
+            bar.style.width = percent + '%';
+        }
+        requestAnimationFrame(updateBar);
+    };
+    updateBar();
+
+    // === MOCK CHARGING (You can hook this to real bow logic) ===
+    window.addEventListener('mousedown', () => {
+        charging = true;
+        chargeStartTime = performance.now();
+    });
+
+    window.addEventListener('mouseup', () => {
+        charging = false;
+        bar.style.width = '0%';
+    });
+})();
