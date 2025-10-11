@@ -1,0 +1,69 @@
+// ==UserScript==
+// @name         Transparent chat mod
+// @version      1.1
+// @description  Custom chat styling for narrow.one
+// @author       wolfart
+// @match        *://narrow.one/*
+// @grant        none
+// @run-at       document-idle
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    function applyChatStyles() {
+        const style = document.createElement('style');
+        style.textContent = `
+.chat-log-container { /* Incoming text messages */
+  font-size: 20pt !important;
+  padding: 0px !important;
+  overflow: hidden !important;
+  max-height: min(800px, 50vh) !important;
+  max-width: min(800px, 50vw) !important;
+}
+
+.chat-container { /* Chat box */
+  padding: 0px !important;
+  background: none !important;
+  position: absolute !important;
+  left: 20px !important; /* Position from left edge */
+  bottom: 70px !important; /* Position from bottom edge */
+  transform: none !important; /* Remove any existing transforms */
+}
+
+.chat-input { /* Written text */
+  font-size: 15pt !important;
+  padding: 0px !important;
+}
+
+.chat-message-name { /* Message author */
+  font-size: 12pt !important;
+}
+
+input::placeholder { /* Press T to write placeholder text */
+  font-family: Ubuntu !important;
+  font-size: 14px !important;
+  text-transform: capitalize;
+  visibility: hidden;
+}
+
+.chat-container.wrinkledPaper.up,
+input.dialog-text-input.wrinkledPaper.chat-input,
+.chat-message-container,
+.chat-message-content {
+  padding: 0px !important;
+  background: none !important;
+}
+
+
+        `;
+        document.head.appendChild(style);
+    }
+
+    // Apply styles when the page loads
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', applyChatStyles);
+    } else {
+        applyChatStyles();
+    }
+})();
