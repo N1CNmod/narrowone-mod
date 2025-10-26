@@ -17,15 +17,17 @@ Dark World Ui: Make the entire world change into the dark theme.
 
 Focus Mod: Allow users to Zoom in/out in the Game.
 
-Rainbow Arrow: Force rainbow arrow trail effect permanently
+Rainbow Arrow: Force rainbow arrow trail effect permanently.
  
-Health Bar Percentage Display: Display a text percentage of current HP bar state (improved from Xeltalliv's version)
+Health Bar Percentage Display: Display a text percentage of current HP bar state (improved from Xeltalliv's version).
 
-Weather Switching: Allow users to add some cool weather effect on your screen
+Weather Switching: Allow users to add some cool weather effect on your screen.
 
-Color Theme Converter: Allow users to change the colors to it's opposite in the color cycle
+Color Theme Converter: Allow users to change the colors to it's opposite in the color cycle.
 
-Hair Color Modifier: Allow users to Modify their hair color easily
+Hair Color Modifier: Allow users to Modify their hair color easily.
+
+Keybinder & Keyboard Visualizer: Allow users to see the keys they pressed and customize the function of keys.
 
 No Physics Changes: This mod does not alter any game physics, ensuring a consistent gaming experience.
 
@@ -81,7 +83,9 @@ Open [Narrow One](https://narrow.one/) and reload the web page.
 
 [Riptide (nova_riptide)](https://www.youtube.com/@Riptide.n1/videos)
 
-[𝓡𝓓𝑮 KING (n1rdgking)]((https://www.youtube.com/channel/UC7IlkhriPV7KFP4pCmZo5ig))
+[𝓡𝓓𝑮 KING (xxkingorexx_prime)]((https://www.youtube.com/channel/UC7IlkhriPV7KFP4pCmZo5ig))
+
+dodobird1 (d1dus_1neptus)
 
 CNN (cnn45000)
 
@@ -93,7 +97,7 @@ N1CN itch: https://n1cn.itch.io/
 
 N1CN official website: https://n1cn.mystrikingly.com/
 
-Other CN members' page: [Duck](https://github.com/Duckynolucky) & [parrol](https://github.com/parrol-CN) & [Wolfart](https://github.com/N1-wolfart) & [Riptide](https://github.com/RiptideN1)
+Other CN members' page: [Duck](https://github.com/Duckynolucky) & [parrol](https://github.com/parrol-CN) & [Wolfart](https://github.com/N1-wolfart) & [Riptide](https://github.com/RiptideN1) & [dodobird1](https://github.com/dodobird1)
 
 # Study Resources(For coders)
 JavaScript & CSS: https://www.w3schools.com/JS/
