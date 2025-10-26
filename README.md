@@ -27,7 +27,9 @@ Color Theme Converter: Allow users to change the colors to it's opposite in the 
 
 Hair Color Modifier: Allow users to Modify their hair color easily.
 
-Keybinder & Keyboard Visualizer: Allow users to see the keys they pressed and customize the function of keys.
+Keyboard Visualizer: Allow users to see the keys they pressed.
+
+Keybinder & Right-click Scope: allows players to customize the functions of different keys and use the right click to scope on Bow 3.
 
 No Physics Changes: This mod does not alter any game physics, ensuring a consistent gaming experience.
 
