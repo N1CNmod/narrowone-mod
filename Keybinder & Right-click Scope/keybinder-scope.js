@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         keybinder + visualizer
 // @namespace    http://tampermonkey.net/
-// @version      1.2
+// @version      1.3
 // @description  Rebind WASD / Q / Space / Y / Left Click, apply to game input, show visualizer, export/import config, and right-click Scope toggle.
 // @author       N1CN | dodobird1
 // @match        https://narrow.one/
@@ -302,8 +302,8 @@
     melee: makeKeyBox('melee','Melee'),
     jump: makeKeyBox('jump','Jump'),
     perspective: makeKeyBox('persp','Perspective'),
-    shoot: makeKeyBox('shoot','Shoot (LMB)'),
-    showdata: makeKeyBox('showdata','Show Data (Tab)')
+    shoot: makeKeyBox('shoot','Shoot'),
+    showdata: makeKeyBox('showdata','Show Data')
   };
 
   // Append in 3x3 order
