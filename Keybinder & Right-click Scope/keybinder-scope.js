@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         keybinder + visualizer v1.1
+// @name         keybinder + visualizer
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.2
 // @description  Rebind WASD / Q / Space / Y / Left Click, apply to game input, show visualizer, export/import config, and right-click Scope toggle.
-// @author       dodobird1
+// @author       N1CN | dodobird1
 // @match        https://narrow.one/
 // @grant        none
 // @run-at       document-idle
@@ -16,11 +16,13 @@
   /*************************************************************************
    * CONFIG
    *************************************************************************/
-  const STORAGE_KEY = 'narrow_one_keybinder_config_v3';
-  const ACTIONS = ['forward','left','back','right','shoot','melee','jump','perspective'];
+  const STORAGE_KEY = 'narrow_one_keybinder_config_v4';
+  // Added action 'showdata' which represents the "show player data" originally bound to Tab
+  const ACTIONS = ['forward','left','back','right','shoot','melee','jump','perspective','showdata'];
   const DEFAULT_BINDINGS = {
     forward: 'KeyW', left: 'KeyA', back: 'KeyS', right: 'KeyD',
-    shoot: 'Mouse0', melee: 'KeyQ', jump: 'Space', perspective: 'KeyY'
+    shoot: 'Mouse0', melee: 'KeyQ', jump: 'Space', perspective: 'KeyY',
+    showdata: 'Tab'   // original Tab function -> show player data
   };
   const DEFAULT_OPTIONS = { rightClickScope: false };
 
@@ -52,6 +54,7 @@
     if(code.startsWith('Key')) return code.slice(3);
     if(code.startsWith('Digit')) return code.slice(5);
     if(code === 'Space') return 'SPACE';
+    if(code === 'Tab') return 'TAB';
     if(code.startsWith('Mouse')){
       const n = parseInt(code.slice(5));
       if(n===0) return 'LMB';
@@ -64,6 +67,7 @@
 
   function codeToKeyAndKeyCode(code){
     if(code === 'Space') return {key:' ', keyCode:32};
+    if(code === 'Tab') return {key:'Tab', keyCode:9};
     if(code.startsWith('Key')) {
       const ch = code.slice(3);
       return {key: ch.toLowerCase(), keyCode: ch.charCodeAt(0)};
@@ -75,7 +79,7 @@
     return {key: code, keyCode: 0};
   }
 
-  // Find dispatch target: prefer pointerLockElement, otherwise first canvas, otherwise document
+  // Prefer pointerLockElement, else first canvas, else document
   function getDispatchTarget(){
     if (document.pointerLockElement) return document.pointerLockElement;
     const canv = document.querySelector('canvas');
@@ -137,10 +141,14 @@
   const rightClickToggle = mkbtn(options.rightClickScope ? 'On':'Off'); rightClickRow.appendChild(rightClickToggle);
   rightClickToggle.addEventListener('click', ()=>{ options.rightClickScope = !options.rightClickScope; rightClickToggle.innerText = options.rightClickScope ? 'On':'Off'; saveConfig(config); });
 
-  // Action rows
+  // Action rows (includes showdata)
   const rows = document.createElement('div'); Object.assign(rows.style,{display:'grid', gap:'6px', gridTemplateColumns:'1fr'}); panel.appendChild(rows);
   const actionRowEls = {};
-  const humanNames = { forward:'Forward (move)', left:'Left (move)', back:'Back (move)', right:'Right (move)', shoot:'Shoot (LMB)', melee:'Melee/Bow', jump:'Jump', perspective:'Perspective' };
+  const humanNames = {
+    forward:'Forward (move)', left:'Left (move)', back:'Back (move)', right:'Right (move)',
+    shoot:'Shoot (LMB)', melee:'Melee/Bow', jump:'Jump', perspective:'Perspective',
+    showdata:'Show Player Data (Tab)'
+  };
   function makeActionRow(action, humanLabel){
     const row = document.createElement('div'); Object.assign(row.style, {display:'flex', justifyContent:'space-between', alignItems:'center', gap:'8px'});
     const left = document.createElement('div'); left.innerText = humanLabel; left.style.width='160px'; row.appendChild(left);
@@ -217,10 +225,8 @@
   /*************************************************************************
    * Binding capture
    *************************************************************************/
-  let capturingAction = null;
   let capturePrompt = null;
   function beginCapture(action){
-    capturingAction = action;
     if(!capturePrompt){
       capturePrompt = document.createElement('div');
       capturePrompt.innerText = 'Press any key or mouse button to bind... (Esc to cancel)';
@@ -228,8 +234,8 @@
       panel.appendChild(capturePrompt);
     } else capturePrompt.style.display='block';
 
-    function onKey(e){ if(!e.isTrusted) return; if(e.code==='Escape'){ endCapture(true); return; } bindings[capturingAction] = e.code; endCapture(false); }
-    function onMouse(e){ if(!e.isTrusted) return; bindings[capturingAction] = 'Mouse' + e.button; e.preventDefault(); e.stopPropagation(); endCapture(false); }
+    function onKey(e){ if(!e.isTrusted) return; if(e.code==='Escape'){ endCapture(true); return; } bindings[action] = e.code; endCapture(false); }
+    function onMouse(e){ if(!e.isTrusted) return; bindings[action] = 'Mouse' + e.button; e.preventDefault(); e.stopPropagation(); endCapture(false); }
 
     beginCapture._onKey = onKey; beginCapture._onMouse = onMouse;
     document.addEventListener('keydown', onKey, {capture:true});
@@ -238,7 +244,6 @@
   function endCapture(cancelled){
     if(beginCapture._onKey) document.removeEventListener('keydown', beginCapture._onKey, {capture:true});
     if(beginCapture._onMouse) document.removeEventListener('mousedown', beginCapture._onMouse, {capture:true});
-    capturingAction = null;
     if(capturePrompt) capturePrompt.style.display='none';
     refreshActionLabels();
     if(!cancelled) saveConfig(config);
@@ -259,7 +264,7 @@
   }
 
   /*************************************************************************
-   * Visualizer: 3x3 centered square, includes RMB
+   * Visualizer: 3x3 centered square, includes Tab(showdata) instead of RMB
    *************************************************************************/
   const viz = document.createElement('div');
   Object.assign(viz.style, {
@@ -288,7 +293,7 @@
 
   // 3x3: row1: melee | forward | perspective
   // row2: left | back | right
-  // row3: rmb | shoot | space (jump)
+  // row3: showdata(Tab) | shoot | space (jump)
   const keyBoxes = {
     forward: makeKeyBox('forward','Forward'),
     left: makeKeyBox('left','Left'),
@@ -298,7 +303,7 @@
     jump: makeKeyBox('jump','Jump'),
     perspective: makeKeyBox('persp','Perspective'),
     shoot: makeKeyBox('shoot','Shoot (LMB)'),
-    rmb: makeKeyBox('rmb','RMB')
+    showdata: makeKeyBox('showdata','Show Data (Tab)')
   };
 
   // Append in 3x3 order
@@ -310,7 +315,7 @@
   grid.appendChild(keyBoxes.back);
   grid.appendChild(keyBoxes.right);
 
-  grid.appendChild(keyBoxes.rmb);
+  grid.appendChild(keyBoxes.showdata);
   grid.appendChild(keyBoxes.shoot);
   grid.appendChild(keyBoxes.jump);
 
@@ -319,15 +324,13 @@
   const simulatedPressed = {};  // code -> boolean for simulated presses we created
 
   function isCodePressed(code){
-    // pressed if real OR simulated OR (scoping & code is original shoot)
     const originalShoot = DEFAULT_BINDINGS.shoot;
     return !!(realPressed[code] || simulatedPressed[code] || (scoping && code === originalShoot));
   }
 
   function updateVisualizerLabels(){
-    // update labels and highlight
+    // update labels and highlight for all ACTIONS (including showdata)
     for(const a of ACTIONS){
-      // map action -> box
       let box = null;
       if(a === 'shoot') box = keyBoxes.shoot;
       else if(a === 'melee') box = keyBoxes.melee;
@@ -337,23 +340,20 @@
       else if(a === 'left') box = keyBoxes.left;
       else if(a === 'back') box = keyBoxes.back;
       else if(a === 'right') box = keyBoxes.right;
+      else if(a === 'showdata') box = keyBoxes.showdata;
       if(!box) continue;
       const labelEl = box.querySelector('.label');
       const code = bindings[a] || DEFAULT_BINDINGS[a];
       labelEl.innerText = codeToLabel(code);
-      box.style.background = isCodePressed(code) ? 'white' : 'transparent';
-      box.style.color = isCodePressed(code) ? 'black' : 'white';
+      const pressed = isCodePressed(code);
+      box.style.background = pressed ? 'white' : 'transparent';
+      box.style.color = pressed ? 'black' : 'white';
     }
-    // update RMB box label & highlight (RMB may not be bound to an action)
-    const rmbLabel = keyBoxes.rmb.querySelector('.label');
-    rmbLabel.innerText = codeToLabel('Mouse2');
-    keyBoxes.rmb.style.background = isCodePressed('Mouse2') ? 'white' : 'transparent';
-    keyBoxes.rmb.style.color = isCodePressed('Mouse2') ? 'black' : 'white';
   }
   updateVisualizerLabels();
 
   /*************************************************************************
-   * Core remapping & Right-click scoping logic (improved)
+   * Core remapping & Right-click scoping logic (adjusted for showdata)
    *************************************************************************/
   function findActionForInputCode(code){
     for(const a of ACTIONS){
@@ -368,7 +368,6 @@
     scoping = true;
     const originalForShoot = DEFAULT_BINDINGS.shoot; // usually 'Mouse0'
     if(originalForShoot && originalForShoot.startsWith('Mouse')){
-      // only simulate mousedown if the game expects mouse
       simulateMouse(parseInt(originalForShoot.slice(5)), 'mousedown');
       simulatedPressed[originalForShoot] = true;
       scopeSimulated = true;
@@ -413,8 +412,17 @@
   // KEYDOWN
   function onKeyDown(e){
     if(!e.isTrusted) return;
+    // ignore UI interactions
     if(e.target && e.target.closest && e.target.closest('.narrow-rebind-ui')) return;
     const code = e.code;
+
+    // Prevent browser tab focusing when Tab pressed during gameplay; allow game to receive the event.
+    if(code === 'Tab' && !(e.target && e.target.closest && e.target.closest('.narrow-rebind-ui'))){
+      // prevent default focus change but allow propagation to the game's handlers
+      try { e.preventDefault(); } catch (err) {}
+      // do not stop propagation: game sees the real keydown
+    }
+
     realPressed[code] = true;
 
     // If scoping and this is the shoot key binding or melee binding -> release scope BEFORE letting the key act
@@ -423,17 +431,20 @@
     if(scoping && (code === currentShootBind || code === currentMeleeBind)){
       // release and simulate release so the game state is consistent
       stopScope(true);
-      // continue handling event so remap still works
+      // continue to remapping below so the pressed key still triggers its action
     }
 
     if(!enabled){ updateVisualizerLabels(); return; }
 
+    // find action that this code corresponds to under current bindings
     const action = findActionForInputCode(code);
     if(!action){ updateVisualizerLabels(); return; }
 
+    // original input the game expects for that action
     const original = DEFAULT_BINDINGS[action];
-    if(!original || original === code){ updateVisualizerLabels(); return; }
+    if(!original || original === code){ updateVisualizerLabels(); return; } // no remap needed
 
+    // Prevent real event, and synthesize original (keydown)
     e.preventDefault(); e.stopImmediatePropagation();
 
     if(original.startsWith('Mouse')){
@@ -443,6 +454,7 @@
       simulateKeyboard(original, 'keydown');
       simulatedPressed[original] = true;
     }
+
     updateVisualizerLabels();
   }
 
@@ -451,6 +463,12 @@
     if(!e.isTrusted) return;
     if(e.target && e.target.closest && e.target.closest('.narrow-rebind-ui')) return;
     const code = e.code;
+
+    // If Tab was used to show player data, prevent browser focus change at keyup as well
+    if(code === 'Tab'){
+      try { e.preventDefault(); } catch(err) {}
+    }
+
     realPressed[code] = false;
 
     if(!enabled){ updateVisualizerLabels(); return; }
@@ -491,11 +509,9 @@
     }
 
     // If scoping and left-click occurs: allow the user to physically release the scoping by clicking LMB.
-    // We'll let the real click go through, but if they release LMB, we will clear the simulated scope state in onMouseUp.
     // If shoot binding is not Mouse0, prevent real LMB from acting as shoot
     const currentShootBind = bindings.shoot || DEFAULT_BINDINGS.shoot;
     if(e.button === 0 && currentShootBind !== 'Mouse0'){
-      // If they physically press LMB while scoping, we allow press but do not treat it as shoot; prevent default to avoid accidental shoot
       e.preventDefault(); e.stopImmediatePropagation();
       updateVisualizerLabels();
       return;
@@ -532,19 +548,16 @@
     // If right-click scope option enabled and this is right button, swallow to avoid contextmenu side effects
     if(options.rightClickScope && e.button === 2){
       e.preventDefault(); e.stopImmediatePropagation();
-      // Already handled on mousedown (toggle), no further action
-      // ensure visual mark for RMB cleared
       updateVisualizerLabels();
       return;
     }
 
-    // If scoping and the user physically released LMB, the game may have released the arrow.
-    // To keep display consistent, treat a real LMB release as an intent to stop scope.
+    // If scoping and the user physically released LMB, treat it as an intent to stop scope.
     if(scoping && e.button === 0){
-      // don't dispatch a synthetic release (real mouseup already happened in the browser), just clear simulated state
-      stopScope(false); // false = do not simulate release event
+      // don't dispatch synthetic release (real mouseup already happened), just clear simulated state
+      stopScope(false); // false = do not synthesize release
       updateVisualizerLabels();
-      // allow normal propagation (do not prevent) so the real mouseup is processed by the game
+      // allow the real mouseup to propagate so the game processes it normally
       return;
     }
 
@@ -568,7 +581,7 @@
     updateVisualizerLabels();
   }
 
-  // Attach listeners (capture) so we can prevent default early
+  // Attach listeners on capture so we can prevent default early
   document.addEventListener('keydown', onKeyDown, true);
   document.addEventListener('keyup', onKeyUp, true);
   document.addEventListener('mousedown', onMouseDown, true);
@@ -577,7 +590,8 @@
   // Prevent context menu globally during gameplay, but allow over UI
   document.addEventListener('contextmenu', (e)=>{
     if(e.target && e.target.closest && e.target.closest('.narrow-rebind-ui')) return;
-    if(options.rightClickScope) { e.preventDefault(); } else { e.preventDefault(); }
+    // suppress menu in gameplay
+    e.preventDefault();
   }, true);
 
   // Clear pressed state on blur
@@ -605,6 +619,6 @@
     resetToDefaults: ()=> { for(const a of ACTIONS) bindings[a]=DEFAULT_BINDINGS[a]; Object.assign(options, DEFAULT_OPTIONS); saveConfig(config); refreshActionLabels(); updateVisualizerLabels(); }
   };
 
-  console.log('narrow.one Keybinder + Visualizer v1.3 loaded (scope & visual fixes).');
+  console.log('narrow.one Keybinder + Visualizer v1.4 loaded (Tab / showdata integrated, RMB removed from viz).');
 
 })();
