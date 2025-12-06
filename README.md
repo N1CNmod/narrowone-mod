@@ -87,7 +87,7 @@ Open [Narrow One](https://narrow.one/) and reload the web page.
 
 [𝓡𝓓𝑮 KING (xxkingorexx_prime)]((https://www.youtube.com/channel/UC7IlkhriPV7KFP4pCmZo5ig))
 
-dodobird1 (d1dus_1neptus)
+[dodobird1 (d1dus_1neptus)](https://github.com/dodobird1)
 
 CNN (cnn45000)
 
