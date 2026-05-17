@@ -1,0 +1,52 @@
+// ==UserScript==
+// @name         Ad skipper
+// @version      1.1
+// @author       RDG king
+// @description  Take over N1 with the help of ADS.
+// @match        https://narrow.one/*
+// @run-at       document-start
+// @grant        GM_addStyle
+// ==/UserScript==
+
+let NarrowSDK = {};
+let skipAds = true;
+
+// Replace the old function with our new modified one.
+Function.prototype.bind = new Proxy(Function.prototype.bind, {
+    apply(target, thisArg, args) {
+        if (args[0] != null) {
+
+            // Validate whether or not the item is the Main class.
+            if (args[0].input !== undefined) {
+                NarrowSDK.Main = args[0];
+                console.log(NarrowSDK.Main);
+                setTimeout(() => hooksActivate());
+            }
+        }
+
+        // Call the original bind method
+        return Reflect.apply(target, thisArg, args);
+    }
+});
+Function.prototype.bind.toString = function() {
+    return "function bind() { [native code] }"
+}
+
+Function.prototype.bind.toString.toString = function() {
+    return "function toString() { [native code] }"
+}
+console.log("%cMain hook was enabled.", "color: #FF00FF");
+
+function hooksActivate() {
+    console.log("%cAds Hook was Loaded!!!", "font-size: 20px")
+    NarrowSDK.Main.poki.originalCommercialBreak ??= NarrowSDK.Main.poki.commercialBreak;
+    NarrowSDK.Main.poki.originalRewardedBreak ??= NarrowSDK.Main.poki.rewardedBreak;
+    NarrowSDK.Main.poki.commercialBreak = async function() {
+        if (!skipAds) NarrowSDK.Main.poki.originalCommercialBreak.call(this);
+    };
+    NarrowSDK.Main.poki.rewardedBreak = async function(...arguments) {
+        return skipAds ? {
+            success: true
+        } : this.originalRewardedBreak(...arguments);
+    }
+}
