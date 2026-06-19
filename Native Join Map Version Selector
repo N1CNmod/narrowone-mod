@@ -117,4 +117,28 @@
         versions.forEach(v => {
             const btn = document.createElement('button');
             btn.textContent = v.name;
-            btn.style.cssText = 'display: block; width: 100%; margin: 10px 0; paddin
+            btn.style.cssText = 'display: block; width: 100%; margin: 10px 0; padding: 12px; font-size: 18px; cursor: pointer; background: #444; color: white; border: 2px solid #666; border-radius: 8px; transition: all 0.2s;';
+            btn.onmouseover = () => { btn.style.background = '#555'; btn.style.borderColor = '#ffc018'; };
+            btn.onmouseout = () => { btn.style.background = '#444'; btn.style.borderColor = '#666'; };
+            btn.onclick = () => {
+                document.body.removeChild(overlay);
+                window.__forcedMapHash = v.hash;
+                console.log('[MOD] Player selected version:', v.name, 'Hash:', v.hash);
+
+                origJoinBtn.click();
+            };
+            dialog.appendChild(btn);
+        });
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.style.cssText = 'margin-top: 20px; padding: 10px 20px; cursor: pointer; background: #600; color: white; border: none; border-radius: 8px; font-size: 16px;';
+        cancelBtn.onclick = () => document.body.removeChild(overlay);
+        dialog.appendChild(cancelBtn);
+
+        overlay.appendChild(dialog);
+        overlay.onclick = (e) => { if (e.target === overlay) document.body.removeChild(overlay); };
+        document.body.appendChild(overlay);
+    }
+
+})();
