@@ -89,8 +89,9 @@ Open [Narrow One](https://narrow.one/) and reload the web page.
 
 [dodobird1 (d1dus_1neptus)](https://github.com/dodobird1)
 
-CNN (cnn45000)
+[Vyrin (n1_vyrin)](https://space.bilibili.com/3493117036595866?spm_id_from=333.337.search-card.all.click)
 
+CNN (cnn45000)
 
 # Links
 N1CN discord server: [discord.gg/zrWcRSJRJk](https://discord.com/invite/zrWcRSJRJk)
@@ -121,6 +122,7 @@ For obfuscators: https://obfuscator.io/
 
 
 # Reminder:
-You can only use this mod on your own responsibility
+Mods might not work all the time.
+You can only use this mod on your own responsibility.
 
 
