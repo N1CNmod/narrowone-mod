@@ -1,0 +1,120 @@
+// ==UserScript==
+// @name         Narrow One - Native Join Map Version Selector
+// @namespace    http://tampermonkey.net/
+// @version      1.3
+// @description  none
+// @author       vyrin
+// @match        *://narrow.one/*
+// @match        *://*.narrow.one/*
+// @grant        none
+// @run-at       document-start
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    let mapsConfigData = null;
+    window.__forcedMapHash = null;
+
+    const originalFetch = window.fetch;
+    window.fetch = async function(...args) {
+        const response = await originalFetch.apply(this, args);
+        const url = typeof args[0] === 'string' ? args[0] : (args[0].url || '');
+
+        if (url.includes('mapsConfig.json')) {
+            try {
+                const clone = response.clone();
+                const data = await clone.json();
+                if (data && data.maps) {
+                    mapsConfigData = data.maps;
+                    console.log('[MOD] Successfully intercepted maps config:', mapsConfigData.length, 'maps');
+                }
+            } catch (e) {
+                console.error('[MOD] Failed to parse map config', e);
+            }
+        }
+        return response;
+    };
+
+    const originalSend = WebSocket.prototype.send;
+    WebSocket.prototype.send = function(data) {
+        if (typeof data === 'string' && window.__forcedMapHash) {
+            try {
+                const msg = JSON.parse(data);
+                if (msg.op === 'preferredMapHashes') {
+                    msg.mapHashes = [{ hash: window.__forcedMapHash, preference: 1 }];
+                    msg.allowPreferredOnly = true;
+                    console.log('[MOD] Successfully intercepted and modified match request, forced map Hash:', window.__forcedMapHash);
+                    data = JSON.stringify(msg);
+
+                    setTimeout(() => { window.__forcedMapHash = null; }, 1000);
+                }
+            } catch (e) {}
+        }
+        return originalSend.apply(this, [data]);
+    };
+
+    const observer = new MutationObserver((mutations) => {
+        if (!mapsConfigData) return;
+
+        const mapItems = document.querySelectorAll('.map-item');
+        mapItems.forEach(item => {
+            const titleEl = item.querySelector('.map-item-title');
+            if (!titleEl) return;
+            const mapName = titleEl.textContent;
+
+            const mapData = mapsConfigData.find(m => m.name === mapName);
+
+            if (mapData && mapData.alternativeMaps && mapData.alternativeMaps.length > 0) {
+                const origJoinBtn = item.querySelector('.map-item-join-button');
+
+                if (origJoinBtn && !origJoinBtn.dataset.modded) {
+                    origJoinBtn.dataset.modded = "true";
+
+                    origJoinBtn.style.visibility = 'hidden';
+                    origJoinBtn.style.pointerEvents = 'none';
+
+                    const fakeJoinBtn = origJoinBtn.cloneNode(true);
+                    fakeJoinBtn.style.visibility = 'visible';
+                    fakeJoinBtn.style.pointerEvents = 'auto';
+                    fakeJoinBtn.style.zIndex = '9999';
+
+                    fakeJoinBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        showVersionDialog(mapData, origJoinBtn);
+                    });
+
+                    origJoinBtn.parentNode.appendChild(fakeJoinBtn);
+                }
+            }
+        });
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    function showVersionDialog(mapData, origJoinBtn) {
+        const versions = [];
+        versions.push({ name: mapData.name + " (Default)", hash: mapData.hash });
+
+        mapData.alternativeMaps.forEach(altAssetName => {
+            const altData = mapsConfigData.find(m => m.assetName === altAssetName);
+            if (altData) {
+                versions.push({ name: altData.name, hash: altData.hash });
+            } else {
+                versions.push({ name: altAssetName, hash: 'unknown' });
+            }
+        });
+
+        const overlay = document.createElement('div');
+        overlay.id = 'narrow-one-mod-overlay';
+        overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 99999; display: flex; align-items: center; justify-content: center; font-family: sans-serif;';
+
+        const dialog = document.createElement('div');
+        dialog.style.cssText = 'background: #2a2a2a; color: white; padding: 30px; border-radius: 15px; border: 3px solid #ffc018; text-align: center; min-width: 300px; box-shadow: 0 0 20px rgba(255, 192, 24, 0.5);';
+        dialog.innerHTML = `<h2 style="margin-top:0; color: #ffc018; text-transform: uppercase;">Select Map Version</h2>`;
+
+        versions.forEach(v => {
+            const btn = document.createElement('button');
+            btn.textContent = v.name;
+            btn.style.cssText = 'display: block; width: 100%; margin: 10px 0; paddin
