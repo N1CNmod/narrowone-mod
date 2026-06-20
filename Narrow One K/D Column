@@ -1,0 +1,84 @@
+// ==UserScript==
+// @name         Narrow One Perfect K/D Column
+// @namespace    http://tampermonkey.net/
+// @version      4.0
+// @description  Completely resolves the issue of the game's native replaceChildren overwriting the K/D column. Uses high-frequency synchronous polling repair, seamlessly blending into the native UI, 100% real-time accuracy.
+// @match        *://narrow.one/*
+// @match        *://*.narrow.one/*
+// @match        *://poki.com/*
+// @grant        none
+// @run-at       document-body
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    function injectKD() {
+        const tables = document.querySelectorAll('.playersListContainer table.itemsTable');
+        if (tables.length === 0) return;
+
+        tables.forEach(table => {
+            const thead = table.querySelector('thead');
+            const tbody = table.querySelector('tbody');
+            const colgroup = table.querySelector('colgroup');
+            if (!thead || !tbody) return;
+
+            const ths = thead.querySelectorAll('th');
+            let killsIndex = -1, deathsIndex = -1;
+
+            ths.forEach((th, i) => {
+                const txt = th.textContent.trim();
+                if (txt === 'Kills') killsIndex = i;
+                if (txt === 'Deaths') deathsIndex = i;
+            });
+
+            const hasKDTh = thead.querySelector('th[data-kd-th]');
+            if (killsIndex !== -1 && deathsIndex !== -1 && !hasKDTh) {
+                if (colgroup && !colgroup.querySelector('col[data-kd-col]')) {
+                    const col = document.createElement('col');
+                    col.style.width = '80px';
+                    col.dataset.kdCol = "true";
+                    colgroup.appendChild(col);
+                }
+                const headRow = thead.querySelector('tr');
+                if (headRow) {
+                    const th = document.createElement('th');
+                    th.textContent = 'K/D';
+                    th.dataset.kdTh = "true";
+                    const nativeTh = headRow.querySelector('th');
+                    if (nativeTh) th.className = nativeTh.className;
+                    headRow.appendChild(th);
+                }
+            }
+
+            const rows = tbody.querySelectorAll('tr');
+            rows.forEach(row => {
+                if (!row.querySelector('td[data-kd-td]')) {
+                    const tds = Array.from(row.querySelectorAll('td'));
+                    const validTds = tds.filter(td => !td.querySelector('.player-avatar'));
+
+                    let kills = 0, deaths = 0;
+                    if (killsIndex !== -1 && validTds[killsIndex]) {
+                        kills = parseInt(validTds[killsIndex].textContent.trim()) || 0;
+                    }
+                    if (deathsIndex !== -1 && validTds[deathsIndex]) {
+                        deaths = parseInt(validTds[deathsIndex].textContent.trim()) || 0;
+                    }
+
+                    let kd = deaths === 0 ? kills : (kills / deaths);
+                    const kdText = (Math.round(kd * 100) / 100).toString();
+
+                    const td = document.createElement('td');
+                    td.textContent = kdText;
+                    td.dataset.kdTd = "true";
+                    const nativeTd = row.querySelector('td');
+                    if (nativeTd) td.className = nativeTd.className;
+                    td.classList.add('playersListItemScore');
+                    row.appendChild(td);
+                }
+            });
+        });
+    }
+
+    setInterval(injectKD, 50);
+})();
