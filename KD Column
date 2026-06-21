@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Narrow One Perfect K/D Column
+// @name         Narrow One K/D Column
 // @namespace    http://tampermonkey.net/
-// @version      4.0
-// @description  Completely resolves the issue of the game's native replaceChildren overwriting the K/D column. Uses high-frequency synchronous polling repair, seamlessly blending into the native UI, 100% real-time accuracy.
+// @version      4.5
+// @description  Adds K/D column. Expands the scoreboard panel width limit to accommodate long usernames natively without shrinking font, wrapping, or truncating.
 // @match        *://narrow.one/*
 // @match        *://*.narrow.one/*
 // @match        *://poki.com/*
@@ -12,6 +12,56 @@
 
 (function() {
     'use strict';
+
+    const style = document.createElement('style');
+    style.textContent = `
+        .playersListContainer .playersListTeam {
+            max-width: 95vw !important;
+            width: auto !important;
+        }
+
+        .playersListContainer .players-list-item-username {
+            max-width: none !important;
+            width: auto !important;
+            flex-wrap: nowrap !important;
+            white-space: nowrap !important;
+        }
+
+        .playersListContainer .player-list-username,
+        .playersListContainer .players-list-label,
+        .playersListContainer .player-name-verified-icon {
+            white-space: nowrap !important;
+            text-overflow: clip !important;
+            overflow: visible !important;
+            flex-shrink: 0 !important;
+            font-size: inherit !important;
+        }
+
+        .playersListContainer table.itemsTable {
+            table-layout: auto !important;
+            width: auto !important;
+        }
+
+        .playersListContainer th[data-kd-th],
+        .playersListContainer td[data-kd-td] {
+            width: 80px !important;
+            min-width: 80px !important;
+            max-width: 80px !important;
+            text-align: center !important;
+            white-space: nowrap !important;
+        }
+
+        .playersListContainer .playersListItemScore {
+            white-space: nowrap !important;
+            text-align: center !important;
+        }
+        
+        .playersListContainer {
+            max-width: 95vw !important;
+            overflow-x: auto !important;
+        }
+    `;
+    document.head.appendChild(style);
 
     function injectKD() {
         const tables = document.querySelectorAll('.playersListContainer table.itemsTable');
@@ -25,7 +75,7 @@
 
             const ths = thead.querySelectorAll('th');
             let killsIndex = -1, deathsIndex = -1;
-
+            
             ths.forEach((th, i) => {
                 const txt = th.textContent.trim();
                 if (txt === 'Kills') killsIndex = i;
