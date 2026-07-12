@@ -3,6 +3,7 @@
 // @namespace    http://tampermonkey.net/
 // @version      1.0
 // @author       intdgy
+// @description  [⚠️ For the sake of fairness, this mod should not be used in formal/official competitions ⚠️]
 // @description  Force rainbow arrow trail effect permanently
 // @match        https://narrow.one/
 // @grant        unsafeWindow
