@@ -3,6 +3,7 @@
 // @author       intdgy
 // @namespace    http://tampermonkey.net/
 // @version      4.1
+// @description  [⚠️ This mod might not be allowed in official competitions ⚠️]
 // @description  Zoom modes (Shift & Right-click)     AND PS: A guy who called infurness in the Narrow One Community is a scum lol. The Mod wouldn't have been so good if it hadn't been for his obstructions and insults.
 // @match        *://narrow.one/*
 // @run-at       document-start
