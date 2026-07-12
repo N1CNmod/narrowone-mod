@@ -2,6 +2,7 @@
 // @name         sky color (red)
 // @namespace    http://tampermonkey.net/
 // @version      2025-06-01
+// @description  [⚠️ For the sake of fairness, this mod should not be used in formal/official competitions ⚠️]
 // @description  Change sky color to red in Narrow.One
 // @author       wolfart (dark sky remix)
 // @match        https://narrow.one/*
