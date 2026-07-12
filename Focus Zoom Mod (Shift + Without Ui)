@@ -2,7 +2,8 @@
 // @name         Narrow One Focus Mod (Shift + Without Ui)
 // @namespace    http://tampermonkey.net/
 // @version      2.2
-// @description  Press SHIFT key to focus (for Apple Magic Mouse)
+// @description  [⚠️ This mod might be not be allowed in formal competitions ⚠️]
+// @description  Press SHIFT key to focus
 // @author       intdgy & Wurenjun
 // @match        https://narrow.one/*
 // @grant        none
