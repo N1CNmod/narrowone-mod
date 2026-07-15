@@ -1,11 +1,13 @@
 // ==UserScript==
-// @name         Narrow One - Native Join Map Version Selector
+// @name         Narrow One - Map Version Selector
 // @namespace    http://tampermonkey.net/
-// @version      1.3
+// @version      1.2
 // @description  none
 // @author       vyrin
 // @match        *://narrow.one/*
 // @match        *://*.narrow.one/*
+// @match        *://poki.com/*
+// @match        *://*.poki.com/*
 // @grant        none
 // @run-at       document-start
 // ==/UserScript==
@@ -13,132 +15,195 @@
 (function() {
     'use strict';
 
-    let mapsConfigData = null;
-    window.__forcedMapHash = null;
+    let bypassNextClick = false;
 
+    window.__narrowOneMapsConfig = null;
     const originalFetch = window.fetch;
     window.fetch = async function(...args) {
         const response = await originalFetch.apply(this, args);
-        const url = typeof args[0] === 'string' ? args[0] : (args[0].url || '');
-
-        if (url.includes('mapsConfig.json')) {
-            try {
+        try {
+            const url = typeof args[0] === 'string' ? args[0] : (args[0] && args[0].url ? args[0].url : '');
+            if (url && url.includes('mapsConfig.json')) {
                 const clone = response.clone();
-                const data = await clone.json();
-                if (data && data.maps) {
-                    mapsConfigData = data.maps;
-                    console.log('[MOD] Successfully intercepted maps config:', mapsConfigData.length, 'maps');
-                }
-            } catch (e) {
-                console.error('[MOD] Failed to parse map config', e);
+                clone.json().then(data => {
+                    window.__narrowOneMapsConfig = data;
+                    console.log('[Mod] Maps config intercepted successfully.');
+                }).catch(() => {});
             }
-        }
+        } catch (e) {}
         return response;
     };
 
-    const originalSend = WebSocket.prototype.send;
-    WebSocket.prototype.send = function(data) {
-        if (typeof data === 'string' && window.__forcedMapHash) {
-            try {
-                const msg = JSON.parse(data);
-                if (msg.op === 'preferredMapHashes') {
-                    msg.mapHashes = [{ hash: window.__forcedMapHash, preference: 1 }];
-                    msg.allowPreferredOnly = true;
-                    console.log('[MOD] Successfully intercepted and modified match request, forced map Hash:', window.__forcedMapHash);
-                    data = JSON.stringify(msg);
-
-                    setTimeout(() => { window.__forcedMapHash = null; }, 1000);
-                }
-            } catch (e) {}
+    const style = document.createElement('style');
+    style.textContent = `
+        .no-map-curtain {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 99999;
+            display: flex; align-items: center; justify-content: center;
+            animation: no-map-fade-in 0.2s ease-out;
         }
-        return originalSend.apply(this, [data]);
-    };
+        @keyframes no-map-fade-in { from { opacity: 0; } to { opacity: 1; } }
+        .no-map-dialog {
+            position: relative; padding: 30px; box-sizing: border-box;
+            width: max-content; max-width: 90vw;
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3));
+            background: var(--default-ui-bg-color, white);
+            background: paint(wrinkledPaper);
+            --wrinkled-paper-color: var(--default-ui-bg-color, white);
+            --wrinkled-paper-border-color: var(--default-wrinkled-paper-border-color, #353535);
+            --wrinkled-paper-seed: 12345;
+        }
+        .no-map-title { margin: 0 0 20px 0; text-align: center; color: var(--default-text-color, black); }
+        .no-map-text { font-family: sans-serif; margin-bottom: 20px; text-align: center; color: var(--default-text-color, black); font-size: 16px; }
+        .no-map-btn-container { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+        .no-map-btn {
+            padding: 7px 30px; height: auto; min-height: 38px;
+            color: var(--default-text-color, black); border: none; appearance: none; cursor: pointer;
+            background: var(--secondary-ui-bg-color, #e1e1e1);
+            background: paint(wrinkledPaper);
+            --wrinkled-paper-color: var(--secondary-ui-bg-color, #e1e1e1);
+            --wrinkled-paper-border-color: var(--default-wrinkled-paper-border-color, #353535);
+            --wrinkled-paper-seed: 54321;
+            min-width: 280px; filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3));
+            transition: filter 0.1s; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .no-map-btn:hover { filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3)) brightness(0.9); }
+        .no-map-btn:active { filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3)) brightness(0.8); }
+        .no-map-btn.cancel { --wrinkled-paper-color: #ffcccc; margin-top: 15px; font-size: 18px; }
+        html.theme-dark .no-map-btn.cancel { --wrinkled-paper-color: #663333; color: #ffaaaa; }
+        .no-map-btn.main-version { --wrinkled-paper-color: #ccffcc; }
+        html.theme-dark .no-map-btn.main-version { --wrinkled-paper-color: #336633; color: #aaffaa; }
+        .no-map-version-label { font-size: 12px; font-family: monospace; text-transform: none; font-weight: normal; line-height: 1.2em; margin-top: 5px; opacity: 0.7; }
+    `;
+    document.head.appendChild(style);
 
-    const observer = new MutationObserver((mutations) => {
-        if (!mapsConfigData) return;
+    document.addEventListener('click', (e) => {
+        if (bypassNextClick) {
+            bypassNextClick = false;
+            return;
+        }
 
-        const mapItems = document.querySelectorAll('.map-item');
-        mapItems.forEach(item => {
-            const titleEl = item.querySelector('.map-item-title');
+        const btn = e.target.closest('.map-item-join-button');
+        if (btn && window.__narrowOneMapsConfig) {
+            const mapItem = btn.closest('.map-item');
+            const titleEl = mapItem ? mapItem.querySelector('.map-item-title') : null;
             if (!titleEl) return;
-            const mapName = titleEl.textContent;
 
-            const mapData = mapsConfigData.find(m => m.name === mapName);
+            const mapName = titleEl.textContent.trim();
+            const mapConfig = window.__narrowOneMapsConfig.maps.find(m => m.name === mapName);
+            if (!mapConfig) return;
 
-            if (mapData && mapData.alternativeMaps && mapData.alternativeMaps.length > 0) {
-                const origJoinBtn = item.querySelector('.map-item-join-button');
+            const hashes = [mapConfig.hash];
+            const altConfigs = [];
 
-                if (origJoinBtn && !origJoinBtn.dataset.modded) {
-                    origJoinBtn.dataset.modded = "true";
-
-                    origJoinBtn.style.visibility = 'hidden';
-                    origJoinBtn.style.pointerEvents = 'none';
-
-                    const fakeJoinBtn = origJoinBtn.cloneNode(true);
-                    fakeJoinBtn.style.visibility = 'visible';
-                    fakeJoinBtn.style.pointerEvents = 'auto';
-                    fakeJoinBtn.style.zIndex = '9999';
-
-                    fakeJoinBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        showVersionDialog(mapData, origJoinBtn);
-                    });
-
-                    origJoinBtn.parentNode.appendChild(fakeJoinBtn);
+            if (mapConfig.alternativeMaps && mapConfig.alternativeMaps.length > 0) {
+                for (const altAsset of mapConfig.alternativeMaps) {
+                    const altConfig = window.__narrowOneMapsConfig.maps.find(m => m.assetName === altAsset);
+                    if (altConfig && altConfig.hash) {
+                        hashes.push(altConfig.hash);
+                        altConfigs.push(altConfig);
+                    }
                 }
             }
-        });
-    });
 
-    observer.observe(document.body, { childList: true, subtree: true });
-
-    function showVersionDialog(mapData, origJoinBtn) {
-        const versions = [];
-        versions.push({ name: mapData.name + " (Default)", hash: mapData.hash });
-
-        mapData.alternativeMaps.forEach(altAssetName => {
-            const altData = mapsConfigData.find(m => m.assetName === altAssetName);
-            if (altData) {
-                versions.push({ name: altData.name, hash: altData.hash });
-            } else {
-                versions.push({ name: altAssetName, hash: 'unknown' });
+            if (hashes.length > 1) {
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                showMapVersionSelector(mapConfig, hashes, altConfigs, btn);
             }
-        });
+        }
+    }, true);
 
-        const overlay = document.createElement('div');
-        overlay.id = 'narrow-one-mod-overlay';
-        overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 99999; display: flex; align-items: center; justify-content: center; font-family: sans-serif;';
+    function formatAssetName(assetName) {
+        if (!assetName) return "Alternative";
+        return assetName.replace(/_/g, ' ').replace(/-/g, ' ');
+    }
+
+    function showMapVersionSelector(mapConfig, hashes, altConfigs, originalBtn) {
+        const curtain = document.createElement('div');
+        curtain.className = 'no-map-curtain';
 
         const dialog = document.createElement('div');
-        dialog.style.cssText = 'background: #2a2a2a; color: white; padding: 30px; border-radius: 15px; border: 3px solid #ffc018; text-align: center; min-width: 300px; box-shadow: 0 0 20px rgba(255, 192, 24, 0.5);';
-        dialog.innerHTML = `<h2 style="margin-top:0; color: #ffc018; text-transform: uppercase;">Select Map Version</h2>`;
+        dialog.className = 'no-map-dialog wrinkledPaper';
+        dialog.style.setProperty('--wrinkled-paper-seed', Math.floor(Math.random() * 99999));
 
-        versions.forEach(v => {
+        const title = document.createElement('h2');
+        title.className = 'no-map-title blueNight dialogTitle';
+        title.textContent = 'Select Version';
+        dialog.appendChild(title);
+
+        const text = document.createElement('div');
+        text.className = 'no-map-text';
+        text.innerHTML = `Multiple versions found for <b>"${mapConfig.name}"</b>.`;
+        dialog.appendChild(text);
+
+        const btnContainer = document.createElement('div');
+        btnContainer.className = 'no-map-btn-container';
+
+        hashes.forEach((hash, idx) => {
             const btn = document.createElement('button');
-            btn.textContent = v.name;
-            btn.style.cssText = 'display: block; width: 100%; margin: 10px 0; padding: 12px; font-size: 18px; cursor: pointer; background: #444; color: white; border: 2px solid #666; border-radius: 8px; transition: all 0.2s;';
-            btn.onmouseover = () => { btn.style.background = '#555'; btn.style.borderColor = '#ffc018'; };
-            btn.onmouseout = () => { btn.style.background = '#444'; btn.style.borderColor = '#666'; };
-            btn.onclick = () => {
-                document.body.removeChild(overlay);
-                window.__forcedMapHash = v.hash;
-                console.log('[MOD] Player selected version:', v.name, 'Hash:', v.hash);
+            btn.className = 'no-map-btn wrinkledPaper blueNight';
+            btn.style.setProperty('--wrinkled-paper-seed', Math.floor(Math.random() * 99999));
 
-                origJoinBtn.click();
-            };
-            dialog.appendChild(btn);
+            let label = '';
+            let subLabel = '';
+
+            if (idx === 0) {
+                label = 'Main Version';
+                btn.classList.add('main-version');
+                subLabel = mapConfig.assetName ? formatAssetName(mapConfig.assetName) : '';
+            } else {
+                const altCfg = altConfigs[idx - 1];
+                label = altCfg.name || `Alternative ${idx}`;
+                subLabel = altCfg.assetName ? formatAssetName(altCfg.assetName) : '';
+                if (altCfg.label) label += ` (${altCfg.label})`;
+            }
+
+            const labelSpan = document.createElement('div');
+            labelSpan.textContent = label;
+            btn.appendChild(labelSpan);
+
+            if (subLabel) {
+                const subSpan = document.createElement('div');
+                subSpan.className = 'no-map-version-label';
+                subSpan.textContent = subLabel;
+                btn.appendChild(subSpan);
+            }
+
+            btn.addEventListener('click', () => {
+                curtain.remove();
+
+                if (!originalBtn.isConnected) {
+                    console.warn('[Mod] Join button no longer exists in DOM.');
+                    return;
+                }
+
+                const targetRandom = (idx + 0.5) / hashes.length;
+                const originalMathRandom = Math.random;
+                Math.random = () => targetRandom;
+
+                bypassNextClick = true;
+
+                originalBtn.click();
+
+                setTimeout(() => {
+                    Math.random = originalMathRandom;
+                }, 0);
+            });
+
+            btnContainer.appendChild(btn);
         });
 
         const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'no-map-btn cancel wrinkledPaper blueNight';
+        cancelBtn.style.setProperty('--wrinkled-paper-seed', Math.floor(Math.random() * 99999));
         cancelBtn.textContent = 'Cancel';
-        cancelBtn.style.cssText = 'margin-top: 20px; padding: 10px 20px; cursor: pointer; background: #600; color: white; border: none; border-radius: 8px; font-size: 16px;';
-        cancelBtn.onclick = () => document.body.removeChild(overlay);
-        dialog.appendChild(cancelBtn);
+        cancelBtn.addEventListener('click', () => curtain.remove());
+        btnContainer.appendChild(cancelBtn);
 
-        overlay.appendChild(dialog);
-        overlay.onclick = (e) => { if (e.target === overlay) document.body.removeChild(overlay); };
-        document.body.appendChild(overlay);
+        dialog.appendChild(btnContainer);
+        curtain.appendChild(dialog);
+        curtain.addEventListener('click', (e) => { if (e.target === curtain) curtain.remove(); });
+        document.body.appendChild(curtain);
     }
-
 })();
