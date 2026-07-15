@@ -1,8 +1,9 @@
 // ==UserScript==
 // @name         Narrow One - Epic Realistic Sky & Clear Weather
 // @namespace    http://tampermonkey.net/
-// @version      2.0
-// @description  Combined realistic HDRI sky mod (Clear Day, Night Sky, Belfast Sunset) and forced clear weather. Press Ctrl+0 to switch skies!
+// @version      2.1
+// @description  Combined realistic HDRI sky mod (Clear Day, Night Sky, Belfast Sunset) and forced clear weather. Press Ctrl+0 to switch skies! (Remembers your last choice)
+// @description  [⚠️ For the sake of fairness, this mod should not be used in formal/official competitions ⚠️]
 // @author       vyrin
 // @match        *://narrow.one/*
 // @match        *://www.narrow.one/*
@@ -32,6 +33,42 @@
         'colorAdder': [0.02, 0.02, 0.00],
         'saturation': 1.25
     };
+
+    const skyOptions = [
+        { name: '☀️ 晴天 (Clear Day)', url: 'https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/kloofendal_48d_partly_cloudy_puresky.jpg' },
+        { name: '🌃 璀璨夜空 (Night Sky)', url: 'https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/dikhololo_night.jpg' },
+        { name: '🌇 贝尔法斯特晚霞 (Belfast Sunset)', url: 'https://cdn.polyhaven.com/asset_img/primary/belfast_sunset_puresky.png?height=760&quality=95' },
+        { name: '🌅 夸塔尼黄昏 (Quatani Sunset)', url: 'https://cdn.polyhaven.com/asset_img/primary/belfast_sunset_puresky.png?height=760&quality=95' },
+    ];
+
+    // localStorage 键名
+    const STORAGE_KEY = 'narrow_one_sky_index';
+
+    // 获取保存的天空索引，如果没有则返回 0
+    function getSavedSkyIndex() {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved !== null) {
+                const index = parseInt(saved, 10);
+                // 验证索引是否有效
+                if (index >= 0 && index < skyOptions.length) {
+                    return index;
+                }
+            }
+        } catch (e) {
+            console.warn('[EpicSky] 无法读取 localStorage:', e);
+        }
+        return 0;
+    }
+
+    // 保存天空索引到 localStorage
+    function saveSkyIndex(index) {
+        try {
+            localStorage.setItem(STORAGE_KEY, index.toString());
+        } catch (e) {
+            console.warn('[EpicSky] 无法保存到 localStorage:', e);
+        }
+    }
 
     const hookGetUniformLocation = function(origFunc) {
         return function(program, name) {
@@ -76,13 +113,10 @@
 
     console.log('[Narrow One Mod] 🌤️ WebGL interceptor started. Locked to clear weather.');
 
-    const skyOptions = [
-        { name: '☀️ 晴天 (Clear Day)', url: 'https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/kloofendal_48d_partly_cloudy_puresky.jpg' },
-        { name: '🌃 璀璨夜空 (Night Sky)', url: 'https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/dikhololo_night.jpg' },
-        { name: '🌇 贝尔法斯特晚霞 (Belfast Sunset)', url: 'https://cdn.polyhaven.com/asset_img/primary/belfast_sunset_puresky.png?height=760&quality=95' }
-    ];
+    // 从 localStorage 恢复上次选择的天空
+    let currentSkyIndex = getSavedSkyIndex();
+    console.log(`[EpicSky] 📂 恢复上次选择的天空: ${skyOptions[currentSkyIndex].name}`);
 
-    let currentSkyIndex = 0;
     let skyMaterial = null;
     let skyTextureClass = null;
     let skyReplaced = false;
@@ -115,6 +149,9 @@
             currentSkyIndex = (currentSkyIndex + 1) % skyOptions.length;
             const selectedSky = skyOptions[currentSkyIndex];
             console.log(`[EpicSky] 🔄 切换天空: ${selectedSky.name}`);
+
+            saveSkyIndex(currentSkyIndex);
+
             showNotification(`🌌 天空已切换: ${selectedSky.name}`);
             loadAndApplySkyTexture(selectedSky.url);
         }
@@ -208,8 +245,9 @@
         skydome.material = skyMaterial;
         skydome.scale.setScalar(450000);
 
-        loadAndApplySkyTexture(skyOptions[currentSkyIndex].url);
-        showNotification(`🌌 史诗天空盒已激活 (按 Ctrl+0 切换)`);
+        const savedSky = skyOptions[currentSkyIndex];
+        loadAndApplySkyTexture(savedSky.url);
+        showNotification(`🌌 史诗天空盒已激活 (按 Ctrl+0 切换) - 当前: ${savedSky.name}`);
         console.log('[EpicSky] 🌌 Epic realistic sky system initialized!');
     }
 
@@ -286,5 +324,5 @@
         }
     }, 1000);
 
-    console.log('[Narrow One Mod] 🚀 Combined Mod v5.1.0 loaded. Press Ctrl+0 to switch skies!');
+    console.log('[Narrow One Mod] 🚀 Combined Mod v2.1 loaded. Press Ctrl+0 to switch skies!');
 })();
