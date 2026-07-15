@@ -36,6 +36,7 @@ No Physics Changes: This mod does not alter any game physics, ensuring a consist
 # No obfuscation 
 
 We welcome everyone to take a look at our scripts and learn them. We did not add any obfuscation which could effects user's understanding. We believe that being selfless and inclusive could be better.
+For all scripts that should not be used in official competitions, we have added annotations in the descriptions of the mods.
 
 # How to run the scripts (step-by-step guide)
 
