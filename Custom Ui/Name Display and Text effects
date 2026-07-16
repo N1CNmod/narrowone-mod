@@ -1,57 +1,399 @@
 // ==UserScript==
 // @name         Special Element Display by CN clan
 // @namespace    http://tampermonkey.net/
-// @version      1
-// @description  Shows your username, KD and avator at the main page
+// @version      2.0
+// @description  Shows your username, KD and avator at the main page + customizable panel (Ctrl+9)
 // @author       Wurenjun
 // @match        https://narrow.one/*
 // @grant        GM_addStyle
+// @grant        GM_setValue
+// @grant        GM_getValue
 // ==/UserScript==
 
-//添加fuction
-//Adding fuction
 (function() {
     'use strict';
 
-    // 添加CSS模型
-    // add CSS fuction
-    GM_addStyle(`
-        /* main page */
-        div.buttonImage {
-            box-shadow: 0 0 20px 10px #00ffd0, 0 0 30px 15px #00ffd0, rgba(0, 0, 255, 0.1);
-        }
-        .main-menu-username {
-            color: #00ffd0;
-        }
-        .scoreOffsetNotificationAnim {
-            color: #00ffa6;
-            text-shadow: 0 0 10px #8327ab, 0 0 20px #6a138f, 0 0 30px #470663, 0 0 40px #470663;
-        }
-        }
-        .scoreOffsetNotificationScore {
-            color: #00ffd0;
-        }
-        .bottom-left-text {
-            font-size: 1.9rem;
-            position: fixed;
-            bottom: 9px;
-            right: 9px;
-            padding: 1.1rem;
-            background-color: rgba(15, 15, 15, 0.4);
-            color: #00ffa6;
-        }
-        div.dialog.dialogTitle {
-            color: #7b49f5;
-        }
-    `);
+    // Default colors 默认设置
+    const DEFAULTS = {
+        bottomText: '𝕮𝕹',
+        textColor: '#00ffa6',
+        glowColor: '#00ffd0'
+    };
 
-    // 创建并附加左下方文本
-    // Create and append bottom left text
-    var bottomLeftText = document.createElement('div');
-    bottomLeftText.className = 'bottom-left-text';
-    bottomLeftText.textContent = '𝕮𝕹';
-    document.body.appendChild(bottomLeftText);
+    // 读取存储
+    function loadSettings() {
+        return {
+            bottomText: GM_getValue('bottomText', DEFAULTS.bottomText),
+            textColor: GM_getValue('textColor', DEFAULTS.textColor),
+            glowColor: GM_getValue('glowColor', DEFAULTS.glowColor)
+        };
+    }
+
+    function saveSettings(settings) {
+        GM_setValue('bottomText', settings.bottomText);
+        GM_setValue('textColor', settings.textColor);
+        GM_setValue('glowColor', settings.glowColor);
+    }
+
+    let settings = loadSettings();
+
+    // 动态注入CSS
+    function injectStyles() {
+        const style = document.createElement('style');
+        style.id = 'cn-custom-styles';
+        style.textContent = `
+            /* main page */
+            div.buttonImage {
+                box-shadow: 0 0 20px 10px ${settings.glowColor}, 0 0 30px 15px ${settings.glowColor}, rgba(0, 0, 255, 0.1);
+            }
+            .main-menu-username {
+                color: ${settings.glowColor};
+            }
+            .scoreOffsetNotificationAnim {
+                color: ${settings.textColor};
+                text-shadow: 0 0 10px #8327ab, 0 0 20px #6a138f, 0 0 30px #470663, 0 0 40px #470663;
+            }
+            .scoreOffsetNotificationScore {
+                color: ${settings.glowColor};
+            }
+            .bottom-left-text {
+                font-size: 1.9rem;
+                position: fixed;
+                bottom: 9px;
+                right: 9px;
+                padding: 1.1rem;
+                background-color: rgba(15, 15, 15, 0.4);
+                color: ${settings.textColor};
+                border-radius: 8px;
+                border: 1px solid ${settings.glowColor};
+                box-shadow: 0 0 15px ${settings.glowColor};
+                z-index: 9999;
+                user-select: none;
+                transition: all 0.3s;
+            }
+
+            .cyber-panel {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(10, 10, 20, 0.92);
+                backdrop-filter: blur(10px);
+                border: 2px solid ${settings.glowColor};
+                box-shadow: 0 0 40px ${settings.glowColor}, inset 0 0 30px rgba(0, 255, 200, 0.1);
+                padding: 30px 35px;
+                border-radius: 20px;
+                color: #00ffd0;
+                font-family: 'Courier New', monospace;
+                z-index: 99999;
+                min-width: 320px;
+                display: none;
+                flex-direction: column;
+                gap: 18px;
+                letter-spacing: 0.5px;
+                text-shadow: 0 0 5px rgba(0, 255, 200, 0.3);
+            }
+            .cyber-panel.active {
+                display: flex;
+            }
+            .cyber-panel h2 {
+                margin: 0 0 8px 0;
+                text-align: center;
+                font-size: 1.8rem;
+                text-transform: uppercase;
+                color: ${settings.glowColor};
+                border-bottom: 1px solid ${settings.glowColor};
+                padding-bottom: 10px;
+                letter-spacing: 4px;
+                text-shadow: 0 0 20px ${settings.glowColor};
+            }
+            .cyber-panel label {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                font-size: 0.9rem;
+                color: #aaffee;
+            }
+            .cyber-panel input[type="text"],
+            .cyber-panel input[type="color"] {
+                background: rgba(0, 30, 40, 0.7);
+                border: 1px solid ${settings.glowColor};
+                border-radius: 8px;
+                padding: 8px 12px;
+                color: #00ffd0;
+                font-family: 'Courier New', monospace;
+                font-size: 0.95rem;
+                outline: none;
+                transition: 0.2s;
+            }
+            .cyber-panel input[type="text"]:focus,
+            .cyber-panel input[type="color"]:focus {
+                box-shadow: 0 0 20px ${settings.glowColor};
+                border-color: #ffffff;
+            }
+            .cyber-panel .color-row {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+            .cyber-panel .color-row input[type="color"] {
+                width: 50px;
+                height: 40px;
+                padding: 2px;
+                cursor: pointer;
+                background: transparent;
+                border-radius: 30px;
+            }
+            .cyber-panel .button-group {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 10px;
+                gap: 12px;
+            }
+            .cyber-panel button {
+                background: transparent;
+                border: 1px solid ${settings.glowColor};
+                color: ${settings.glowColor};
+                padding: 10px 20px;
+                border-radius: 30px;
+                font-family: 'Courier New', monospace;
+                font-weight: bold;
+                font-size: 0.9rem;
+                text-transform: uppercase;
+                cursor: pointer;
+                transition: 0.2s;
+                letter-spacing: 2px;
+                flex: 1;
+                background: rgba(0, 255, 200, 0.05);
+                box-shadow: 0 0 10px rgba(0, 255, 200, 0.1);
+            }
+            .cyber-panel button:hover {
+                background: ${settings.glowColor};
+                color: #0a0a14;
+                box-shadow: 0 0 30px ${settings.glowColor};
+                transform: scale(1.02);
+            }
+            .cyber-panel .close-btn {
+                position: absolute;
+                top: 12px;
+                right: 18px;
+                background: none;
+                border: none;
+                color: ${settings.glowColor};
+                font-size: 1.8rem;
+                cursor: pointer;
+                text-shadow: 0 0 15px ${settings.glowColor};
+                transition: 0.2s;
+            }
+            .cyber-panel .close-btn:hover {
+                transform: rotate(90deg);
+                color: #ff6b9d;
+            }
+            /* 背景遮罩 */
+            .cyber-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                backdrop-filter: blur(4px);
+                z-index: 99998;
+                display: none;
+            }
+            .cyber-overlay.active {
+                display: block;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // 创建或更新左下角文字
+    function updateBottomText() {
+        let el = document.querySelector('.bottom-left-text');
+        if (!el) {
+            el = document.createElement('div');
+            el.className = 'bottom-left-text';
+            document.body.appendChild(el);
+        }
+        el.textContent = settings.bottomText;
+        el.style.color = settings.textColor;
+        el.style.borderColor = settings.glowColor;
+        el.style.boxShadow = `0 0 15px ${settings.glowColor}`;
+    }
+
+    // 创建面板HTML格式
+    function createPanel() {
+
+        const overlay = document.createElement('div');
+        overlay.className = 'cyber-overlay';
+        overlay.id = 'cyber-overlay';
+        document.body.appendChild(overlay);
+
+        const panel = document.createElement('div');
+        panel.className = 'cyber-panel';
+        panel.id = 'cyber-panel';
+        panel.innerHTML = `
+            <button class="close-btn" id="panel-close">✕</button>
+            <h2>⚡ Console ⚡</h2>
+            <label>
+                Text
+                <input type="text" id="input-text" value="${settings.bottomText}" placeholder="输入文字...">
+            </label>
+            <label>
+                Text colour
+                <div class="color-row">
+                    <input type="color" id="input-textcolor" value="${settings.textColor}">
+                    <span style="font-size:0.8rem;opacity:0.7;">${settings.textColor}</span>
+                </div>
+            </label>
+            <label>
+                Light effect color (border + shadow)
+                <div class="color-row">
+                    <input type="color" id="input-glowcolor" value="${settings.glowColor}">
+                    <span style="font-size:0.8rem;opacity:0.7;">${settings.glowColor}</span>
+                </div>
+            </label>
+            <div class="button-group">
+                <button id="btn-save">💾 Save</button>
+                <button id="btn-reset">↺ Reset</button>
+            </div>
+            <div style="text-align:center;font-size:0.7rem;opacity:0.4;margin-top:6px;">[ Ctrl+9 切换面板 ]</div>
+        `;
+        document.body.appendChild(panel);
+
+        // 事件绑定
+        // 关闭按钮
+        document.getElementById('panel-close').addEventListener('click', () => {
+            togglePanel(false);
+        });
+        // 点击遮罩关闭
+        overlay.addEventListener('click', () => {
+            togglePanel(false);
+        });
+
+        // 保存
+        document.getElementById('btn-save').addEventListener('click', () => {
+            const newText = document.getElementById('input-text').value.trim() || 'Edit this with Ctrl + 9';
+            const newTextColor = document.getElementById('input-textcolor').value;
+            const newGlowColor = document.getElementById('input-glowcolor').value;
+
+            settings.bottomText = newText;
+            settings.textColor = newTextColor;
+            settings.glowColor = newGlowColor;
+
+            saveSettings(settings);
+            applyAll();
+            togglePanel(false);
+        });
+
+        // 重置
+        document.getElementById('btn-reset').addEventListener('click', () => {
+            settings.bottomText = DEFAULTS.bottomText;
+            settings.textColor = DEFAULTS.textColor;
+            settings.glowColor = DEFAULTS.glowColor;
+            saveSettings(settings);
+            // 刷新输入框
+            document.getElementById('input-text').value = settings.bottomText;
+            document.getElementById('input-textcolor').value = settings.textColor;
+            document.getElementById('input-glowcolor').value = settings.glowColor;
+            // 更新颜色显示
+            updateColorLabels();
+            applyAll();
+            togglePanel(false);
+        });
+
+        // 实时更新颜色标签
+        document.getElementById('input-textcolor').addEventListener('input', (e) => {
+            const span = e.target.parentElement.querySelector('span');
+            if (span) span.textContent = e.target.value;
+        });
+        document.getElementById('input-glowcolor').addEventListener('input', (e) => {
+            const span = e.target.parentElement.querySelector('span');
+            if (span) span.textContent = e.target.value;
+        });
+
+        // 键盘 Ctrl+9 切换 To toggle with Ctrl + 9
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === '9') {
+                e.preventDefault();
+                togglePanel();
+            }
+        });
+    }
+
+    function togglePanel(forceState) {
+        const panel = document.getElementById('cyber-panel');
+        const overlay = document.getElementById('cyber-overlay');
+        if (!panel || !overlay) return;
+        const isActive = panel.classList.contains('active');
+        const newState = (forceState !== undefined) ? forceState : !isActive;
+        panel.classList.toggle('active', newState);
+        overlay.classList.toggle('active', newState);
+
+        // 如果打开，同步当前设置到输入框
+        if (newState) {
+            document.getElementById('input-text').value = settings.bottomText;
+            document.getElementById('input-textcolor').value = settings.textColor;
+            document.getElementById('input-glowcolor').value = settings.glowColor;
+            updateColorLabels();
+        }
+    }
+
+    function updateColorLabels() {
+        const tc = document.getElementById('input-textcolor');
+        const gc = document.getElementById('input-glowcolor');
+        if (tc) {
+            const span = tc.parentElement.querySelector('span');
+            if (span) span.textContent = tc.value;
+        }
+        if (gc) {
+            const span = gc.parentElement.querySelector('span');
+            if (span) span.textContent = gc.value;
+        }
+    }
+
+    function applyAll() {
+        // 移除旧样式
+        const oldStyle = document.getElementById('cn-custom-styles');
+        if (oldStyle) oldStyle.remove();
+        injectStyles();
+        updateBottomText();
+        // 更新面板边框颜色（如果存在）
+        const panel = document.getElementById('cyber-panel');
+        if (panel) {
+            panel.style.borderColor = settings.glowColor;
+            panel.style.boxShadow = `0 0 40px ${settings.glowColor}, inset 0 0 30px rgba(0, 255, 200, 0.1)`;
+            const h2 = panel.querySelector('h2');
+            if (h2) {
+                h2.style.color = settings.glowColor;
+                h2.style.textShadow = `0 0 20px ${settings.glowColor}`;
+            }
+            const btns = panel.querySelectorAll('button:not(.close-btn)');
+            btns.forEach(btn => {
+                btn.style.borderColor = settings.glowColor;
+                btn.style.color = settings.glowColor;
+                btn.style.boxShadow = `0 0 10px rgba(0, 255, 200, 0.1)`;
+            });
+            const inputs = panel.querySelectorAll('input[type="text"], input[type="color"]');
+            inputs.forEach(inp => {
+                inp.style.borderColor = settings.glowColor;
+            });
+        }
+    }
+
+    function init() {
+        injectStyles();
+        updateBottomText();
+        createPanel();
+        // 如果面板已经存在，应用颜色
+        applyAll();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+
 })();
-
-    //灵感来源于T7mod，特别鸣谢
-    // Inspiration comes from T7mod, special thanks
