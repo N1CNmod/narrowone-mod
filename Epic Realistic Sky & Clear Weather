@@ -38,7 +38,7 @@
         { name: '☀️ 晴天 (Clear Day)', url: 'https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/kloofendal_48d_partly_cloudy_puresky.jpg' },
         { name: '🌃 璀璨夜空 (Night Sky)', url: 'https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/dikhololo_night.jpg' },
         { name: '🌇 贝尔法斯特晚霞 (Belfast Sunset)', url: 'https://cdn.polyhaven.com/asset_img/primary/belfast_sunset_puresky.png?height=760&quality=95' },
-        { name: '🌅 夸塔尼黄昏 (Quatani Sunset)', url: 'https://cdn.polyhaven.com/asset_img/primary/belfast_sunset_puresky.png?height=760&quality=95' },
+        { name: '🌅 夸塔尼黄昏 (Quatani Sunset)', url: 'https://cdn.polyhaven.com/asset_img/primary/qwantani_dusk_2_puresky.png?height=760&quality=95' },
     ];
 
     // localStorage 键名
